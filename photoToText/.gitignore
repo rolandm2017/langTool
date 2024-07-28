@@ -1,2 +1,15 @@
 ptt
 /ptt
+
+.env
+ankiscripttool-ffdfa0374899.json
+*.json
+
+__pycache__
+
+*.jpg
+
+*.png
+*.heic
+
+/textDb
