@@ -1,0 +1,22 @@
+{
+    "name": "jsondbparser",
+    "version": "1.0.0",
+    "main": "dbParser.js",
+    "scripts": {
+        "test": "vitest",
+        "test:s": "vitest run tests/FrenchWordUtil.test.js",
+        "format": "prettier --write ."
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "dotenv": "^16.4.5",
+        "pg": "^8.12.0",
+        "stream-json": "^1.8.0"
+    },
+    "type": "module",
+    "devDependencies": {
+        "vitest": "^2.0.5"
+    }
+}
