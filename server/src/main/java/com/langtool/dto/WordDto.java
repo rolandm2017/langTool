@@ -8,6 +8,7 @@ public class WordDto {
     private String origin;
     private LocalDateTime dateSubmitted;
     private int novelty;
+    private int mentions;
 
     // Constructor
     public WordDto() {}
@@ -50,5 +51,13 @@ public class WordDto {
 
     public void setNovelty(int novelty) {
         this.novelty = novelty;
+    }
+
+    public int getMentions() {
+        return mentions;
+    }
+    
+    public void setMentions(int mentions) {
+        this.mentions = mentions;
     }
 }

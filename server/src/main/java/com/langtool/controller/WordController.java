@@ -1,16 +1,22 @@
 package com.langtool.controller;
 
-import com.langtool.dto.WordDto;
-import com.langtool.service.WordService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.langtool.dto.WordDto;
+import com.langtool.dto.BatchWordDto;
+import com.langtool.service.WordService;
+import com.langtool.dto.CsvOutput;
+
+
 
 @RestController
 @RequestMapping("/words")
@@ -27,7 +33,17 @@ public class WordController {
     }
 
     @PostMapping
-    public ResponseEntity<WordDto> addWord(@RequestBody WordDto word) {
+    public ResponseEntity<?> addWord(@RequestBody WordDto word) {
+        if (originIsNull(word)) {
+            ErrorResponse errorResponse = ErrorResponse.builder(
+                new IllegalArgumentException("word origin was null"),
+                HttpStatus.BAD_REQUEST,
+                "Word origin must not be null")
+            .title("Invalid Word Data")
+            // .type(URI.create("https://api.your-domain.com/errors/invalid-word"))
+            .build();
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
         word.setDateSubmitted(LocalDateTime.now());
         // words.add(word);
         this.wordService.saveWord(word);
@@ -35,14 +51,28 @@ public class WordController {
     }
 
     @PostMapping("/batch")
-    public ResponseEntity<WordDto[]> addWords(@RequestBody WordDto[] words) {
+    public ResponseEntity<BatchWordDto> addWords(@RequestBody BatchWordDto words) {
+        System.out.println("Number of words submitted: " + words.getWords().length);
+
         this.wordService.saveWords(words);
-        return new ResponseEntity<>(words, HttpStatus.CREATED);
+        return new ResponseEntity<BatchWordDto>(words, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/generateCsv")
+    public ResponseEntity<CsvOutput> generateCsv(@RequestBody BatchWordDto words) {
+        System.out.println("Number of words submitted: " + words.getWords().length);
+
+        CsvOutput csv = this.wordsService.generateCsvFrom(words);
+        return new RespponseEntity<CsvOutput>(csv, HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWord(@PathVariable Long id) {
         wordService.deleteWord(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    private boolean originIsNull(WordDto word) {
+        return word.getOrigin() == null;
     }
 }

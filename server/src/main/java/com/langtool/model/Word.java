@@ -18,6 +18,7 @@ public class Word {
     private String origin;
     private LocalDateTime dateSubmitted;
     private int novelty;
+    private int mentions; // number of times the word has been submitted
 
     // Getters and setters
     public Long getId() {
@@ -51,4 +52,13 @@ public class Word {
     public void setNovelty(int novelty) {
         this.novelty = novelty;
     }
+
+    public int getMentions() {
+        return mentions;
+    }
+    
+    public void setMentions(int mentions) {
+        this.mentions = mentions;
+    }
+    
 }

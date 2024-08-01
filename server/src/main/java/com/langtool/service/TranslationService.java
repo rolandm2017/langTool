@@ -1,10 +1,19 @@
-// package com.langtool.service;
+package com.langtool.service;
 
-// import com.langtool.object.TranslationPair;
+import org.springframework.stereotype.Service;
 
-// public class TranslationService {
 
-//     public TranslationPair[] translateWords(String[] words) {
-//         // todo
-//     }
-// }
+import com.langtool.object.TranslationPair;
+
+@Service
+public class TranslationService {
+
+    public TranslationPair[] translateWords(String[] words) {
+        // todo
+    }
+
+    public String translateFrToEn(String fr) {
+        // todo
+        return "";
+    }
+}
