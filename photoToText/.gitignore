@@ -13,3 +13,5 @@ __pycache__
 *.heic
 
 /textDb
+
+*.csv
