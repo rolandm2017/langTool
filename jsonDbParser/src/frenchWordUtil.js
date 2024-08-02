@@ -44,7 +44,6 @@ function getGenderFromHeadTemplate(headTemplateArgs) {
             return possiblyGender
         }
     }
-    console.log(headTemplateArgs, "39rm")
     const propertyOneExists = headTemplateArgs[0]["1"] !== undefined
     if (propertyOneExists) {
         if (

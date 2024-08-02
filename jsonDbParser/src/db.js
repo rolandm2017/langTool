@@ -1,5 +1,16 @@
+/*
+ * noun - gender
+ * ID - should not be the word itself ? or should be
+ * definition
+ * infinitive - if verb
+ * for nouns: "forms" i.e. chien -> chienne -> chiens, chiennes
+ * tags?
+ *
+ */
+
 import pg from "pg"
 const { Client } = pg
+const { Pool } = pg
 import tables from "./createTable.sql.js"
 
 import dotenv from "dotenv"
@@ -15,140 +26,161 @@ const dbConfig = {
     database: process.env.DB_DATABASE,
 }
 
-/*
- * noun - gender
- * ID - should not be the word itself ? or should be
- * definition
- * infinitive - if verb
- * for nouns: "forms" i.e. chien -> chienne -> chiens, chiennes
- * tags?
- *
- */
-
 class DB {
     constructor() {
-        this.client = new Client(dbConfig)
+        console.log(dbConfig)
+        this.pool = new Pool(dbConfig)
+    }
 
-        this.client
-            .connect()
-            .then(() => {
-                console.log("Connected to the database")
-                return this.createTables()
-            })
-            .catch((err) => console.error("Database connection error", err))
+    async initialize() {
+        try {
+            await this.pool.query("SELECT NOW()")
+            console.log("Connected to the database")
+            await this.createTables()
+            return this
+        } catch (err) {
+            console.error("Database connection error", err)
+            throw err
+        }
     }
 
     async createTables() {
-        const tableDefinitions = [...tables]
-        for (const table of tableDefinitions) {
-            try {
-                await this.client.query(table)
-                console.log(`Table '${table.name}' created successfully.`)
-            } catch (err) {
-                console.error(`Error creating table '${table.name}'`, err)
+        const client = await this.pool.connect()
+        try {
+            await client.query("BEGIN")
+            for (let [key, value] of Object.entries(tables)) {
+                await client.query(value)
+                console.log(`Table '${key}' created successfully.`)
             }
+            await client.query("COMMIT")
+        } catch (error) {
+            await client.query("ROLLBACK")
+            console.error("Error creating tables:", error)
+            throw error
+        } finally {
+            client.release()
+        }
+        // throw new Error("Pausing create teables")
+    }
+
+    async batchInsert(words) {
+        const client = await this.pool.connect()
+        try {
+            await client.query("BEGIN")
+            for (let word of words) {
+                // Implement your insert logic here
+                // Use parameterized queries to prevent SQL injection
+            }
+            await client.query("COMMIT")
+        } catch (e) {
+            await client.query("ROLLBACK")
+            throw e
+        } finally {
+            client.release()
         }
     }
 
     // Create a noun
     async createNoun(wordText, gender) {
+        const client = await this.pool.connect()
         try {
-            await this.client.query(
-                "INSERT INTO nouns (word, gender) VALUES ($1, $2)",
+            await client.query(
+                "INSERT INTO nouns (word, gender) VALUES ($1, $2) ON CONFLICT (word) DO NOTHING",
                 [wordText, gender]
             )
-            console.log(`Noun '${wordText}' created successfully.`)
-        } catch (err) {
-            console.error("Error creating noun", err)
-            throw err
+            console.log(`Noun '${wordText}' processed successfully.`)
+        } finally {
+            client.release()
         }
     }
 
     async createNounPluralForm(wordText, pluralForm) {
+        const client = await this.pool.connect()
         try {
-            await this.client.query(
-                "INSERT INTO nouns (word, plural_of) VALUES ($1, $2)",
+            await client.query(
+                "INSERT INTO nouns (word, plural_of) VALUES ($1, $2) ON CONFLICT (word) DO NOTHING",
                 [wordText, pluralForm]
             )
-            console.log(`Plural noun '${wordText}' created successfully.`)
-        } catch (err) {
-            console.error("Error creating plural noun", err)
-            throw err
+            console.log(`Plural noun '${wordText}' processed successfully.`)
+        } finally {
+            client.release()
         }
     }
 
     // Create a verb
     async createVerb(word) {
+        const client = await this.pool.connect()
         try {
-            await this.client.query("INSERT INTO verbs (word) VALUES ($1)", [
-                word,
-            ])
-            console.log(`Verb '${word}' created successfully.`)
-        } catch (err) {
-            console.error("Error creating verb", err)
-            throw err
+            await client.query(
+                "INSERT INTO verbs (word) VALUES ($1) ON CONFLICT (word) DO NOTHING",
+                [word]
+            )
+            console.log(`Verb '${word}' processed successfully.`)
+        } finally {
+            client.release()
         }
     }
 
     // Create an adjective
     async createAdjective(word) {
+        const client = await this.pool.connect()
         try {
-            await this.client.query(
-                "INSERT INTO adjectives (word) VALUES ($1, $2)",
+            await client.query(
+                "INSERT INTO adjectives (word) VALUES ($1) ON CONFLICT (word) DO NOTHING",
                 [word]
             )
-            console.log(`Adjective '${word}' created successfully.`)
-        } catch (err) {
-            console.error("Error creating adjective", err)
-            throw err
+            console.log(`Adjective '${word}' processed successfully.`)
+        } finally {
+            client.release()
         }
     }
 
     async createAdverb(word) {
+        const client = await this.pool.connect()
         try {
-            await this.client.query(
-                "INSERT INTO adverbs (word) VALUES ($1, $2)",
+            await client.query(
+                "INSERT INTO adverbs (word) VALUES ($1) ON CONFLICT (word) DO NOTHING",
                 [word]
             )
-            console.log(`Adjective '${word}' created successfully.`)
-        } catch (err) {
-            console.error("Error creating adjective", err)
-            throw err
+            console.log(`Adverb '${word}' processed successfully.`)
+        } finally {
+            client.release()
         }
     }
 
     async createName(nameText, gender) {
+        const client = await this.pool.connect()
         try {
-            await this.client.query(
-                "INSERT INTO names (word, gender) VALUES ($1, $2)",
+            await client.query(
+                "INSERT INTO names (name, gender) VALUES ($1, $2) ON CONFLICT (name) DO NOTHING",
                 [nameText, gender]
             )
-            console.log(`Name '${nameText}' created successfully.`)
-        } catch (err) {
-            console.error("Error creating name", err)
-            throw err
+            console.log(`Name '${nameText}' processed successfully.`)
+        } finally {
+            client.release()
         }
     }
 
     async createOther(wordText, wordType) {
+        const client = await this.pool.connect()
         try {
-            await this.client.query(
-                "INSERT INTO others (word, type) VALUES ($1, $2)",
+            await client.query(
+                "INSERT INTO others (word, type) VALUES ($1, $2) ON CONFLICT (word) DO NOTHING",
                 [wordText, wordType]
             )
             console.log(
-                `Other word '${wordText}' of type '${wordType}' created successfully.`
+                `Other word '${wordText}' of type '${wordType}' processed successfully.`
             )
-        } catch (err) {
-            console.error("Error creating name", err)
-            throw err
+        } finally {
+            client.release()
         }
     }
-
     // Read all nouns
     async readNouns() {
         try {
-            const result = await this.client.query("SELECT * FROM nouns")
+            const client = await this.pool.connect()
+
+            const result = await client.query("SELECT * FROM nouns")
             return result.rows
         } catch (err) {
             console.error("Error reading nouns", err)
@@ -158,7 +190,9 @@ class DB {
     // Read all verbs
     async readVerbs() {
         try {
-            const result = await this.client.query("SELECT * FROM verbs")
+            const client = await this.pool.connect()
+
+            const result = await client.query("SELECT * FROM verbs")
             return result.rows
         } catch (err) {
             console.error("Error reading verbs", err)
@@ -168,7 +202,9 @@ class DB {
     // Read all adjectives
     async readAdjectives() {
         try {
-            const result = await this.client.query("SELECT * FROM adjectives")
+            const client = await this.pool.connect()
+
+            const result = await client.query("SELECT * FROM adjectives")
             return result.rows
         } catch (err) {
             console.error("Error reading adjectives", err)
@@ -177,7 +213,9 @@ class DB {
 
     async readAdverbs() {
         try {
-            const result = await this.client.query("SELECT * FROM adverbs")
+            const client = await this.pool.connect()
+
+            const result = await client.query("SELECT * FROM adverbs")
             return result.rows
         } catch (err) {
             console.error("Error reading adverbs", err)
@@ -186,7 +224,9 @@ class DB {
 
     async readNames() {
         try {
-            const result = await this.client.query("SELECT * FROM names")
+            const client = await this.pool.connect()
+
+            const result = await client.query("SELECT * FROM names")
             return result.rows
         } catch (err) {
             console.error("Error reading names", err)
