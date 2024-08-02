@@ -16,19 +16,27 @@ function parseRawTagsData(dataDotForms) {
 }
 
 function getGenderFromHeadTemplate(headTemplateArgs) {
-    // /*
-    //  * FIXME: There are many many ways for the gender to appear in the 'head template args' and I don't catch all of them
-    //  */
     const firstPlaceToLook = headTemplateArgs[0]["1"]
-    if (firstPlaceToLook === "m" || firstPlaceToLook === "f") {
+    const isSingleCharGender =
+        firstPlaceToLook === "m" || firstPlaceToLook === "f"
+    if (isSingleCharGender) {
         return firstPlaceToLook
+    }
+    const isGenderDenotedPlural =
+        firstPlaceToLook &&
+        firstPlaceToLook.length === 3 &&
+        firstPlaceToLook.includes("-")
+    if (isGenderDenotedPlural) {
+        const splitByDash = firstPlaceToLook.split("-")
+        const possiblyGender = splitByDash[0]
+        if (possiblyGender === "m" || possiblyGender === "f") {
+            return possiblyGender
+        }
     }
     const secondPlaceToLook = headTemplateArgs[0].g
     if (secondPlaceToLook === "m" || secondPlaceToLook === "f") {
         return secondPlaceToLook
     }
-    // maybe it's "m-p" or "f-p":
-    // console.log(headTemplateArgs, secondPlaceToLook, "31rm")
     if (secondPlaceToLook && secondPlaceToLook.includes("-")) {
         const splitByDash = secondPlaceToLook.split("-")
         const possiblyGender = splitByDash[0]
@@ -39,15 +47,13 @@ function getGenderFromHeadTemplate(headTemplateArgs) {
     console.log(headTemplateArgs, "39rm")
     const propertyOneExists = headTemplateArgs[0]["1"] !== undefined
     if (propertyOneExists) {
-        // console.log(headTemplateArgs[0]["1"], "VVVVVVVVVVVVVV VVVV 42rm")
         if (
             headTemplateArgs[0]["1"] === "mf" ||
             headTemplateArgs[0]["1"] === "mfbysense"
         )
-            // console.log(headTemplateArgs[0]["1"].slice(0, 2), "41rm")
             return "both"
     }
-    return "?"
+    return null
 }
 
 function getGenderFromG(headTemplateArgs) {}

@@ -32,33 +32,17 @@ let a = 0
 
 function tallyWordType(word) {
     if (word.pos in counts) {
-        // console.log('v: ', word.word)
         counts[word.pos]++
         if (word.pos === "noun") {
-            // console.log(word, '56rm')
-            // console.log(counts, 'v2 56rm')
             if (word.isFeminine || word.isMasculine) {
                 counts.nounWithGender++
             } else {
                 counts.genderlessNoun++
-                // console.log(word, word.headTemplates[0].args, "65rm")
                 inspector.push(word)
                 a++
                 if (a > 10) {
                     inspector.forEach((entry) => {
                         console.log(entry.word, entry.headTemplateArgs) // todo:
-                        // these are the genders fo the words, 9/10x
-                        //                         abime [ { '1': 'm' } ]
-                        // aberrance [ { '1': 'f' } ]
-                        // ablactation [ { '1': 'f' } ]
-                        // abjuration [ { '1': 'f' } ]
-                        // abjection [ { '1': 'f' } ]
-                        // abraxas [ { '1': 'm' } ]
-                        // abreuvoir [ { '1': 'm' } ]
-                        // abbatial [ { '1': 'm' } ]
-                        // abord [ { '1': 'm' } ]
-                        // abscission [ { '1': 'f' } ]
-                        // patronage [ { '1': 'm' } ]
                     })
                     process.exit()
                 }
@@ -81,7 +65,7 @@ let fakeDbProblems = 0
 class FakeDB {
     constructor() {
         this.filePath = "./myFakeDb.txt"
-        this.problemLinesPath = "./problemLines.jsonl"
+        this.problemLinesPath = "./skippedEntries.jsonl"
         this.fileHandle = fs.openSync(this.filePath, "w")
         this.problemLinesHandle = fs.openSync(this.problemLinesPath, "w")
     }
@@ -141,37 +125,53 @@ class FakeDB {
     }
 }
 
+function setGender(word) {
+    let gender
+    if (word.isFeminine || word.isMasculine || word.isBoth) {
+        if (word.isFeminine) {
+            gender = "feminine"
+        } else if (word.isMasculine) {
+            gender = "masculine"
+        } else if (word.isBoth) {
+            gender = "both"
+        } else {
+            gender = null
+        }
+    }
+    return gender
+}
+
 function addWordToDatabase(word) {
     const wordType = word.pos
+    const text = word.word
     if (wordType === "noun") {
-        let gender
-        if (word.isFeminine || word.isMasculine || word.isBoth) {
-            if (word.isFeminine) {
-                gender = "feminine"
-            } else if (word.isMasculine) {
-                gender = "masculine"
-            } else if (word.isBoth) {
-                gender = "both"
+        let gender = setGender(word)
+        if (gender) {
+            db.createNoun(text, gender)
+        } else {
+            // handle situations where pos = noun but gender is ? -> it's probably a plural form
+            // fakeDb.writeSrcLine(word.srcLine)
+            // fakeDb.write(word.senses[0].glosses + "\n")
+            const glossesEntry = word.senses[0].glosses[0]
+            if (glossesEntry && glossesEntry.startsWith("plural of ")) {
+                const noun = glossesEntry.slice(9)
+                db.createNounPluralForm(noun, word.senses[0].glosses)
             } else {
-                // console.log(word, "89rm")
-                // console.log("Unset gender detected")
-                // throw new Error("Unset gender detected")
-                // process.exit()
+                fakeDb.writeSrcLine(word.srcLine)
             }
         }
-        fakeDb.createNoun(word.word, gender, word)
+    } else if (wordType === "verb") {
+        db.createVerb(text)
+    } else if (wordType === "adj") {
+        db.createAdjective(text)
+    } else if (wordType === "adv") {
+        db.createAdverb(text)
+    } else if (wordType === "name") {
+        let gender = setGender(word)
+        db.createName(text, gender)
+    } else {
+        db.createOther(text, wordType)
     }
-    // db.createNoun(word.word, )
-    // } else if (wordType === "verb") {
-    //     //
-    // } else if (wordType === "adj") {
-    //     //
-    // } else if (wordType === "adv") {
-    // } else if (wordType === "name") {
-    //     //
-    // } else {
-    //     //
-    // }
 }
 
 const fileStream = fs.createReadStream(FILE_PATH)
@@ -186,44 +186,39 @@ function main() {
     fileStream.pipe(lineTransform)
 
     lineTransform.on("data", (line) => {
-        try {
-            const jsonObject = JSON.parse(line)
-            // console.log(jsonObject)
+        const jsonObject = JSON.parse(line)
+        // console.log(jsonObject)
+        // process.exit()
+        if (jsonObject.lang_code === "fr") {
+            v = v + 1
+            // Process the JSON object
+            // console.log(jsonObject);
+            const frenchWord = new FrenchWord(jsonObject)
+            // console.log("setting line ", jsonObject)
             // process.exit()
-            if (jsonObject.lang_code === "fr") {
-                v = v + 1
-                // Process the JSON object
-                // console.log(jsonObject);
-                const frenchWord = new FrenchWord(jsonObject)
-                // console.log("setting line ", jsonObject)
-                // process.exit()
-                frenchWord.srcLine = jsonObject
-                // console.log(frenchWord.srcLine, "198rm")
-                // process.exit()
-                // console.log(`======= ${v} ====== ${v} ${v} === `)
-                // console.log(frenchWord)
-                // if (v === 10) process.exit()
-                // process.exit()
-                // console.log(v, frenchWord.pos)
-                // console.log(frenchWord)
-                // process.exit()
-                // tallyWordType(frenchWord)
-                addWordToDatabase(frenchWord)
-                if (fakeDbProblems === 50) {
-                    fakeDb.closeFile()
-                    fakeDb.closeProblemsFile()
-                    console.log("Reached 200 problem lines")
-                    process.exit()
-                }
-                // if (v == 100000) {
-                //     console.log("Tags: ", frenchWord.forms.map(form => form.tags.join(", ")))
-                // console.log(counts, others)
-                // process.exit()
-                // }
+            frenchWord.srcLine = jsonObject
+            // console.log(frenchWord.srcLine, "198rm")
+            // process.exit()
+            // console.log(`======= ${v} ====== ${v} ${v} === `)
+            // console.log(frenchWord)
+            // if (v === 10) process.exit()
+            // process.exit()
+            // console.log(v, frenchWord.pos)
+            // console.log(frenchWord)
+            // process.exit()
+            // tallyWordType(frenchWord)
+            addWordToDatabase(frenchWord)
+            if (fakeDbProblems === 250) {
+                fakeDb.closeFile()
+                fakeDb.closeProblemsFile()
+                console.log("Reached 200 problem lines")
+                process.exit()
             }
-        } catch (err) {
-            console.error("Error parsing JSON:", err)
-            throw err
+            // if (v == 100000) {
+            //     console.log("Tags: ", frenchWord.forms.map(form => form.tags.join(", ")))
+            // console.log(counts, others)
+            // process.exit()
+            // }
         }
     })
 

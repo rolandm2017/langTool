@@ -1,18 +1,19 @@
 // -- Table for Nouns
 const nouns = `CREATE TABLE IF NOT EXISTS nouns (
     id SERIAL PRIMARY KEY,
-    word VARCHAR(255) NOT NULL,
+    word VARCHAR(255) NOT NULL UNIQUE,
     gender TEXT,
     definition TEXT,
     part_of_speech VARCHAR(50) DEFAULT 'noun',
     example_sentence TEXT,
+    plural_of TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`
 
 // -- Table for Verbs
 const verbs = `CREATE TABLE IF NOT EXISTS verbs (
     id SERIAL PRIMARY KEY,
-    word VARCHAR(255) NOT NULL,
+    word VARCHAR(255) NOT NULL UNIQUE,
     definition TEXT,
     tense VARCHAR(50),  -- e.g., past, present, future
     conjugation TEXT,   -- e.g., "I run, you run, he runs..."
@@ -23,7 +24,7 @@ const verbs = `CREATE TABLE IF NOT EXISTS verbs (
 // -- Table for Adjectives
 const adjectives = `CREATE TABLE IF NOT EXISTS adjectives (
     id SERIAL PRIMARY KEY,
-    word VARCHAR(255) NOT NULL,
+    word VARCHAR(255) NOT NULL UNIQUE,
     definition TEXT,
     degree VARCHAR(50),  -- e.g., positive, comparative, superlative
     example_sentence TEXT,
@@ -33,23 +34,23 @@ const adjectives = `CREATE TABLE IF NOT EXISTS adjectives (
 // -- Table for Adverbs
 const adverbs = `CREATE TABLE IF NOT EXISTS adverbs (
     id SERIAL PRIMARY KEY,
-    word VARCHAR(255) NOT NULL,
+    word VARCHAR(255) NOT NULL UNIQUE,
     definition TEXT,
     degree VARCHAR(50),  -- e.g., positive, comparative, superlative
     example_sentence TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`
 
-const names = `CREATE TABLE IF NOT EXISTS nouns (
+const names = `CREATE TABLE IF NOT EXISTS names (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     gender VARCHAR(50), -- Updated to VARCHAR to match the type of gender
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`
 
 const otherType = `CREATE TABLE IF NOT EXISTS others (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    word VARCHAR(255) NOT NULL UNIQUE,
     type VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`
