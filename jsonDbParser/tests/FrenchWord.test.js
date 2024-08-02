@@ -3,12 +3,28 @@ import { it, describe, test, expect } from "vitest"
 import { FrenchWord } from "../src/FrenchWord"
 
 import { a, b, c, d, e, f, gVerb, h, iAdj, j, k } from "./specificEntries"
+import { atypicalM, atypicalN, atypicalO, atypicalP } from "./atypicalEntries"
+import { twoGenderC, twoGenderD, twoGenderE } from "./mfEntries"
 
 describe("the french word class parses data correctly", () => {
     // a, b, c, d, e, f, __, h, j, k
     it("handles the gender being found in the head template args", () => {
         // those are: A, B, C, D, E, F, ## H, J, K
-        const expectedToPass = [a, b, c, d, e, f, h, j, k]
+        const expectedToPass = [
+            a,
+            b,
+            c,
+            d,
+            e,
+            f,
+            h,
+            j,
+            k,
+            atypicalM,
+            atypicalN,
+            atypicalO,
+            atypicalP,
+        ]
         const words = []
         for (const jsonLine of expectedToPass) {
             const word = new FrenchWord(jsonLine)
@@ -40,4 +56,12 @@ describe("the french word class parses data correctly", () => {
     // it("handles the word being an adverb", () => {
     // adverb
     // })
+    it("handles the word being both M and F", () => {
+        const twoGenderV1 = new FrenchWord(twoGenderC)
+        const twoGenderV2 = new FrenchWord(twoGenderD)
+        const twoGenderV3 = new FrenchWord(twoGenderE)
+        expect(twoGenderV1.isBoth).toBeTruthy()
+        expect(twoGenderV2.isBoth).toBeTruthy()
+        expect(twoGenderV3.isBoth).toBeTruthy()
+    })
 })

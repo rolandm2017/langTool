@@ -2,10 +2,12 @@ import {
     parseRawTagsData,
     parseHeadTemplateArgs,
     getGenderFromHeadTemplate,
-} from "./frenchWordUtil"
+} from "./frenchWordUtil.js"
 
 class FrenchWord {
     constructor(data) {
+        console.log(data, "9rm")
+        this.srcLine = undefined
         //   this.sounds = data.sounds.map(sound => new Sound(sound)); // don't care
         //   this.etymologyText = data.etymology_text; // don't care
         //   this.etymologyTemplates = data.etymology_templates.map(template => new EtymologyTemplate(template)); // don't care
@@ -14,7 +16,10 @@ class FrenchWord {
         if (data.forms) {
             rawTagsData = parseRawTagsData(data.forms) // data.forms.map((form) => form.tags).flat()
         }
-        let headTemplateArgs = parseHeadTemplateArgs(data.head_templates)
+        let headTemplateArgs =
+            data.pos === "noun"
+                ? parseHeadTemplateArgs(data.head_templates)
+                : undefined
         this.pos = data.pos
         this.headTemplates = undefined
         if (data.head_templates) {
@@ -41,9 +46,14 @@ class FrenchWord {
         let genderWasSet
         if (headTemplateArgs) {
             const genderFromArgs = getGenderFromHeadTemplate(headTemplateArgs)
+            console.log(genderFromArgs, "49rm")
             this.isFeminine = genderFromArgs === "f"
             this.isMasculine = genderFromArgs === "m"
-            genderWasSet = genderFromArgs === "f" || genderFromArgs === "m"
+            this.isBoth = genderFromArgs === "both"
+            genderWasSet =
+                genderFromArgs === "f" ||
+                genderFromArgs === "m" ||
+                genderFromArgs === "both"
         }
         if (rawTagsData && !genderWasSet) {
             this.isFeminine = rawTagsData.tagsArray.includes("feminine")
