@@ -95,9 +95,9 @@ class FakeDB {
     }
 
     createNoun(word, gender, originalWordObject) {
-        console.log("writing ", word)
+        console.log(`writing ${word} with ${gender}`)
         if (gender === undefined) {
-            // console.log(originalWordObject, "92rm")
+            console.log(originalWordObject, "92rm")
             this.writeSrcLine(originalWordObject.srcLine)
             // throw new Error("Undefined gender")
         }
@@ -145,7 +145,7 @@ function addWordToDatabase(word) {
     const wordType = word.pos
     if (wordType === "noun") {
         let gender
-        if (word.isFeminine || word.isMasculine) {
+        if (word.isFeminine || word.isMasculine || word.isBoth) {
             if (word.isFeminine) {
                 gender = "feminine"
             } else if (word.isMasculine) {
@@ -209,7 +209,7 @@ function main() {
                 // process.exit()
                 // tallyWordType(frenchWord)
                 addWordToDatabase(frenchWord)
-                if (fakeDbProblems === 200) {
+                if (fakeDbProblems === 50) {
                     fakeDb.closeFile()
                     fakeDb.closeProblemsFile()
                     console.log("Reached 200 problem lines")

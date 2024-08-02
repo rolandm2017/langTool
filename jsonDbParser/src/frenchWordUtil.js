@@ -38,18 +38,14 @@ function getGenderFromHeadTemplate(headTemplateArgs) {
     }
     console.log(headTemplateArgs, "39rm")
     const propertyOneExists = headTemplateArgs[0]["1"] !== undefined
-    const propertyOneValueHasThirdChar = headTemplateArgs[0]["1"].length
-    if (
-        propertyOneExists &&
-        propertyOneValueHasThirdChar &&
-        headTemplateArgs[0]["1"].slice(0, 2) === "mf"
-    ) {
-        console.log(headTemplateArgs[0]["1"].slice(0, 2), "41rm")
-        return "both"
-    }
-    if (propertyOneExists && headTemplateArgs[0]["1"] === "mf") {
-        console.log(headTemplateArgs[0]["1"], "41rm")
-        return "both"
+    if (propertyOneExists) {
+        // console.log(headTemplateArgs[0]["1"], "VVVVVVVVVVVVVV VVVV 42rm")
+        if (
+            headTemplateArgs[0]["1"] === "mf" ||
+            headTemplateArgs[0]["1"] === "mfbysense"
+        )
+            // console.log(headTemplateArgs[0]["1"].slice(0, 2), "41rm")
+            return "both"
     }
     return "?"
 }

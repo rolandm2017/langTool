@@ -6,7 +6,7 @@ import {
 
 class FrenchWord {
     constructor(data) {
-        console.log(data, "9rm")
+        // console.log(data, "9rm")
         this.srcLine = undefined
         //   this.sounds = data.sounds.map(sound => new Sound(sound)); // don't care
         //   this.etymologyText = data.etymology_text; // don't care
@@ -46,7 +46,7 @@ class FrenchWord {
         let genderWasSet
         if (headTemplateArgs) {
             const genderFromArgs = getGenderFromHeadTemplate(headTemplateArgs)
-            console.log(genderFromArgs, "49rm")
+            // console.log(genderFromArgs, "49rm")
             this.isFeminine = genderFromArgs === "f"
             this.isMasculine = genderFromArgs === "m"
             this.isBoth = genderFromArgs === "both"
