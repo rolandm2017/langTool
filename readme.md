@@ -1,39 +1,21 @@
-graphql
+# What is LangTool?
 
-dockerize the thing
+langtool is a repo of several disjointed tools that I believe will be useful for language learning after some work.
 
-## June 21 update
+## Repositories
 
-Reviving the project. It will be a tool that logs my progress with words.
+/jsonDbParser -> Parses a long .jsonl file that is a french dictionary into a Postgres db.
+/client -> Some day it will house an Anki-esque GUI enabling users to rate a word's difficulty.
+/server -> Will handle a variety of tasks, including
 
-We'll see how far it gets.
+-   Keeping track of which words the user knows already.
+-   Translating words using external services.
+-   Generating .csv files of unknown words to convert into Anki decks.
 
-Ok so, I send the word or array of words into the program. It checks if there are duplicates, and adds the non-duped words to the db with a date.
+/langLordsAnkiScript -> IDK what this is TBH.
+/photoToText -> A program that enables you to send photos to Google's Cloud Vision API and get the photo's text returned.
 
-Later, I can retrieve a group of words, perhaps by date_added or by days_since_added, and check my progress with them by
-responding to a quiz or something. Perhaps five words at a time in a UI.
+-   Will later feed the photo's text into the /server server to bundle into an Anki deck.
 
-I enter my response and, the responses go to the server. The server sends the responses with a prompt to GPT.
-
-GPT sends back a rating per word describing: How well did the description match the meaning?
-
-GPT rates the description out of 5 or 10. GPT also explains the rating.
-
-Was the description not fully encompassing? Was the description lacking in some way? Was one definition not covered at all?
-
-After a month of using the program, the MISSION, the OBJECTIVE is to allow me to
-query the program and check: Did I actually learn the words I added? How well did I learn the words?
-
-### Measuring progress
-
-Per word, I can track quiz responses and marks for the quiz as given by GPT.
-
-Say you have a word show up in a quiz 8x over the course of a month. You answer and get marks 4, 4, 5, 8, 8, 8, 8, 8
-
-Then clearly, you learned the word!
-
-You could also submit a word as being "completely new" or "I kind of know this" but let's KISS for now.
-
-### Oh yeah I should do it by hand first
-
-I can do this with a spreadsheet and GPT on my own. I should do it by hand to see if I like doing it.
+/storyGenerator -> Will some day, maybe, become a GPT wrapper that turns lists of unknown words into stories.
+/textToSpeechScript -> Uses ElevenLabs to convert text to high quality speech in a target language. To be used for shadowing exercises.
