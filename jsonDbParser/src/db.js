@@ -233,10 +233,114 @@ class DB {
         }
     }
 
+    async readNoun(word) {
+        const client = await this.pool.connect()
+        try {
+            const result = await client.query(
+                "SELECT * FROM nouns WHERE word = $1",
+                [word]
+            )
+            return result.rows[0] || null
+        } finally {
+            client.release()
+        }
+    }
+
+    async readVerb(word) {
+        const client = await this.pool.connect()
+        try {
+            const result = await client.query(
+                "SELECT * FROM verbs WHERE word = $1",
+                [word]
+            )
+            return result.rows[0] || null
+        } finally {
+            client.release()
+        }
+    }
+
+    async readAdjective(word) {
+        const client = await this.pool.connect()
+        try {
+            const result = await client.query(
+                "SELECT * FROM adjectives WHERE word = $1",
+                [word]
+            )
+            return result.rows[0] || null
+        } finally {
+            client.release()
+        }
+    }
+
+    async readAdverb(word) {
+        const client = await this.pool.connect()
+        try {
+            const result = await client.query(
+                "SELECT * FROM adverbs WHERE word = $1",
+                [word]
+            )
+            return result.rows[0] || null
+        } finally {
+            client.release()
+        }
+    }
+
+    async readName(word) {
+        const client = await this.pool.connect()
+        try {
+            const result = await client.query(
+                "SELECT * FROM names WHERE word = $1",
+                [word]
+            )
+            return result.rows[0] || null
+        } finally {
+            client.release()
+        }
+    }
+
+    async readOther(word) {
+        const client = await this.pool.connect()
+        try {
+            const result = await client.query(
+                "SELECT * FROM others WHERE word = $1",
+                [word]
+            )
+            return result.rows[0] || null
+        } finally {
+            client.release()
+        }
+    }
+
+    async readWord(word) {
+        const tables = [
+            "nouns",
+            "verbs",
+            "adjectives",
+            "adverbs",
+            "names",
+            "others",
+        ]
+        const client = await this.pool.connect()
+        try {
+            for (let table of tables) {
+                const result = await client.query(
+                    `SELECT '${table}' AS type, * FROM ${table} WHERE word = $1`,
+                    [word]
+                )
+                if (result.rows.length > 0) {
+                    return result.rows[0]
+                }
+            }
+            return null
+        } finally {
+            client.release()
+        }
+    }
+
     // Close the database connection
     async close() {
         try {
-            await this.client.end()
+            await this.pool.end()
             console.log("Database connection closed")
         } catch (err) {
             console.error("Error closing database connection", err)

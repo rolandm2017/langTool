@@ -52,3 +52,5 @@ console.log(`The word you passed is: ${word}`)
 // For example, let's reverse the word
 const reversedWord = word.split("").reverse().join("")
 console.log(`The reversed word is: ${reversedWord}`)
+
+export { getWordGenderFromDb }
