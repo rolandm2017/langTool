@@ -28,7 +28,7 @@ const dbConfig = {
 
 class DB {
     constructor() {
-        console.log(dbConfig)
+        console.log("db config: ", dbConfig.host, dbConfig.user)
         this.pool = new Pool(dbConfig)
     }
 
