@@ -5,7 +5,7 @@ interface WordFrequency {
     count: number
 }
 
-const AnkiDeckDownload: React.FC = () => {
+const AnkiDeckDownloadPage: React.FC = () => {
     const [wordFrequencies, setWordFrequencies] = useState<WordFrequency[]>([])
 
     useEffect(() => {
@@ -121,4 +121,4 @@ const styles = {
     },
 }
 
-export default AnkiDeckDownload
+export default AnkiDeckDownloadPage

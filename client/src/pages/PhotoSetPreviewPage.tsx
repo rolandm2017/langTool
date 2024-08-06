@@ -16,7 +16,7 @@ interface FrequencyDistribution {
     count: number
 }
 
-const WordDistributionChart: React.FC = () => {
+const PhotoSetPreviewPage: React.FC = () => {
     const chartRef = useRef<HTMLCanvasElement | null>(null)
 
     useEffect(() => {
@@ -141,4 +141,4 @@ se,82`
     )
 }
 
-export default WordDistributionChart
+export default PhotoSetPreviewPage
