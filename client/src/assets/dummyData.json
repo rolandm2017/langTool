@@ -1,0 +1,82 @@
+[
+    {
+      "french": "chat",
+      "gender": "masculine",
+      "english": "cat"
+    },
+    {
+      "french": "maison",
+      "gender": "feminine",
+      "english": "house"
+    },
+    {
+      "french": "livre",
+      "gender": "masculine",
+      "english": "book"
+    },
+    {
+      "french": "fleur",
+      "gender": "feminine",
+      "english": "flower"
+    },
+    {
+      "french": "arbre",
+      "gender": "masculine",
+      "english": "tree"
+    },
+    {
+      "french": "table",
+      "gender": "feminine",
+      "english": "table"
+    },
+    {
+      "french": "soleil",
+      "gender": "masculine",
+      "english": "sun"
+    },
+    {
+      "french": "lune",
+      "gender": "feminine",
+      "english": "moon"
+    },
+    {
+      "french": "chien",
+      "gender": "masculine",
+      "english": "dog"
+    },
+    {
+      "french": "voiture",
+      "gender": "feminine",
+      "english": "car"
+    },
+    {
+      "french": "oiseau",
+      "gender": "masculine",
+      "english": "bird"
+    },
+    {
+      "french": "chaise",
+      "gender": "feminine",
+      "english": "chair"
+    },
+    {
+      "french": "pain",
+      "gender": "masculine",
+      "english": "bread"
+    },
+    {
+      "french": "eau",
+      "gender": "feminine",
+      "english": "water"
+    },
+    {
+      "french": "temps",
+      "gender": "masculine",
+      "english": "time"
+    },
+    {
+      "french": "ville",
+      "gender": "feminine",
+      "english": "city"
+    }
+  ]
