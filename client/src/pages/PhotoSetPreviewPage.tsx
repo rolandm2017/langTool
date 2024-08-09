@@ -22,33 +22,37 @@ interface FrequencyDistribution {
 
 const PhotoSetPreviewPage: React.FC = () => {
     const chartRef = useRef<HTMLCanvasElement | null>(null)
+    const chartInstanceRef = useRef<Chart | null>(null)
 
     useEffect(() => {
         if (chartRef.current) {
             const ctx = chartRef.current.getContext("2d")
             if (ctx) {
+                if (chartInstanceRef.current) {
+                    chartInstanceRef.current.destroy()
+                }
                 // Parse the word frequency data
                 // TODO: import dummy data from tempData.txt in /assets
                 const wordFrequencies: WordFrequency[] = `de,438 
-la,372
-le,311
-il,237
-les,204
-et,196
-à,167
-commissaire,156
-un,155
-une,145
-pas,145
-vous,143
-du,126
-dans,120
-est,120
-je,120
-ne,100
-:,98
-des,94
-se,82`
+                        la,372
+                        le,311
+                        il,237
+                        les,204
+                        et,196
+                        à,167
+                        commissaire,156
+                        un,155
+                        une,145
+                        pas,145
+                        vous,143
+                        du,126
+                        dans,120
+                        est,120
+                        je,120
+                        ne,100
+                        :,98
+                        des,94
+                        se,82`
                     .split("\n")
                     .map((line) => {
                         const [word, count] = line.split(",")
@@ -133,7 +137,8 @@ se,82`
                     options: options,
                 }
 
-                new Chart(ctx, config)
+                // Create and store the new chart instance
+                chartInstanceRef.current = new Chart(ctx, config)
             }
         }
     }, [])

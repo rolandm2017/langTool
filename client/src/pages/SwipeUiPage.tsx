@@ -47,7 +47,7 @@ const SwipeUiPage: React.FC = () => {
 
     return (
         <div style={styles.container}>
-            <h1 style={styles.title}>Word Knowledge Test</h1>
+            <h1 style={styles.title}>Swipe to Sort</h1>
             <div style={styles.wordContainer}>
                 <h2 style={styles.word}>{words[currentWordIndex].text}</h2>
             </div>
@@ -76,10 +76,11 @@ const SwipeUiPage: React.FC = () => {
 
 const styles = {
     container: {
+        padding: "40px 0 0 0",
         display: "flex",
         flexDirection: "column" as const,
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "start",
         height: "100vh",
         fontFamily: "Arial, sans-serif",
         backgroundColor: "#f0f0f0",

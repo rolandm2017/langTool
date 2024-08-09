@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import RatingList from "../components/RatingList"
 
 type Difficulty = "impossible" | "hard" | "medium" | "easy"
 
@@ -78,12 +79,7 @@ const WordRatingPage: React.FC = () => {
                 <p style={styles.instructions}>
                     Rate this word using your keyboard:
                 </p>
-                <ul style={styles.ratingList}>
-                    <li>1 - Impossible</li>
-                    <li>2 - Hard</li>
-                    <li>3 - Medium</li>
-                    <li>4 - Easy</li>
-                </ul>
+                <RatingList />
             </div>
             {rating && (
                 <div
@@ -101,10 +97,11 @@ const WordRatingPage: React.FC = () => {
 
 const styles = {
     container: {
+        padding: "40px 0 0 0",
         display: "flex",
         flexDirection: "column" as const,
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "start",
         height: "100vh",
         fontFamily: "Arial, sans-serif",
         backgroundColor: "#f0f0f0",
