@@ -5,7 +5,7 @@ interface PhotoUploaderProps {
     maxFiles?: number
 }
 
-const PhotoUploader: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
+const PhotoUploaderPage: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
     const [files, setFiles] = useState<File[]>([])
 
     const onDrop = useCallback(
@@ -66,12 +66,17 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
             </div>
             {files.length > 0 && (
                 <div>
-                    <h4>Files to upload:</h4>
-                    <ul>
-                        {files.map((file) => (
-                            <li key={file.name}>{file.name}</li>
-                        ))}
-                    </ul>
+                    <div>
+                        <h4>Files to upload:</h4>
+                        <ul>
+                            {files.map((file) => (
+                                <li key={file.name}>{file.name}</li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div>
+                        <button>Upload</button>
+                    </div>
                 </div>
             )}
         </div>
@@ -86,4 +91,4 @@ const dropzoneStyles: React.CSSProperties = {
     cursor: "pointer",
 }
 
-export default PhotoUploader
+export default PhotoUploaderPage

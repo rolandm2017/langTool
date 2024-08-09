@@ -1,35 +1,73 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react"
+import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom"
+
+import AnkiDeckDownloadPage from "./pages/AnkiDeckDownloadPage"
+import PhotoUploaderPage from "./pages/PhotoUploadPage"
+import PhotoSetPreviewPage from "./pages/PhotoSetPreviewPage"
+import SwipeUiPage from "./pages/SwipeUiPage"
+import WordRatingPage from "./pages/WordRatingPage"
+
+import "./App.css"
+
+const routesOptions = {
+    wordRating: "/wordRating",
+    photoUpload: "/photoUpload",
+    photoSetPreview: "/photoSetPreview",
+    ankiDeckDownload: "/ankiDeckDownload",
+    swipeUi: "/swipeUiPage",
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    return (
+        <Router>
+            <div>
+                <nav>
+                    <ul>
+                        <li>
+                            <Link to={routesOptions.wordRating}>
+                                Word Rating
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to={routesOptions.photoSetPreview}>
+                                Photo Set Preview
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to={routesOptions.photoUpload}>
+                                Photo Upload
+                            </Link>
+                        </li>
+                    </ul>
+                </nav>
+
+                <Routes>
+                    <Route
+                        path={routesOptions.ankiDeckDownload}
+                        element={<AnkiDeckDownloadPage />}
+                    />
+                    <Route
+                        path={routesOptions.photoSetPreview}
+                        element={<PhotoSetPreviewPage />}
+                    />
+                    <Route
+                        path={routesOptions.photoUpload}
+                        element={<PhotoUploaderPage />}
+                    />
+                    <Route
+                        path={routesOptions.swipeUi}
+                        element={<SwipeUiPage />}
+                    />
+                    <Route
+                        path={routesOptions.wordRating}
+                        element={<WordRatingPage />}
+                    />
+                </Routes>
+            </div>
+        </Router>
+    )
 }
 
 export default App

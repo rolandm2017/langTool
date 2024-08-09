@@ -5,7 +5,7 @@ interface Word {
     text: string
 }
 
-const WordKnowledgeTest: React.FC = () => {
+const SwipeUiPage: React.FC = () => {
     const [words, setWords] = useState<Word[]>([
         { id: 1, text: "bonjour" },
         { id: 2, text: "merci" },
@@ -121,4 +121,4 @@ const styles = {
     },
 }
 
-export default WordKnowledgeTest
+export default SwipeUiPage
