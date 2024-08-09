@@ -1,3 +1,7 @@
+//
+// User can mark some words as 'misread,' 'non-existent,' 'bugs,' etc or 'not wanted' on this page
+//
+
 import React, { useEffect, useRef } from "react"
 import {
     Chart,
