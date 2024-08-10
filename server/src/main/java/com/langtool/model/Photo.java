@@ -13,17 +13,17 @@ public class Photo {
     @Column(nullable = false)
     private String filePath;
 
-    @ElementCollection
-    @CollectionTable(name = "photo_texts", joinColumns = @JoinColumn(name = "photo_id"))
-    @Column(name = "text")
-    private List<String> extractedTexts;
+    // @ElementCollection
+    // @CollectionTable(name = "photo_texts", joinColumns = @JoinColumn(name = "photo_id"))
+    // @Column(name = "text")
+    // private List<String> extractedTexts;
 
     // Constructors
     public Photo() {}
 
     public Photo(String filePath, List<String> extractedTexts) {
         this.filePath = filePath;
-        this.extractedTexts = extractedTexts;
+        // this.extractedTexts = extractedTexts;
     }
 
     // Getters and setters
@@ -39,11 +39,11 @@ public class Photo {
         this.filePath = filePath;
     }
 
-    public List<String> getExtractedTexts() {
-        return extractedTexts;
-    }
+    // public List<String> getExtractedTexts() {
+    //     return extractedTexts;
+    // }
 
-    public void setExtractedTexts(List<String> extractedTexts) {
-        this.extractedTexts = extractedTexts;
-    }
+    // public void setExtractedTexts(List<String> extractedTexts) {
+    //     this.extractedTexts = extractedTexts;
+    // }
 }

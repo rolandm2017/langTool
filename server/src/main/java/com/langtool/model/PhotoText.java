@@ -1,12 +1,27 @@
 package com.langtool.model;
 
-public class PhotoText {
-    private Long id;
-    private String[] texts;
+import jakarta.persistence.*;
 
-    public PhotoText(Long id, String[] texts) {
-        this.id = id;
-        this.texts = texts;
+
+@Entity
+@Table(name = "photo_texts")
+public class PhotoText {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "photo_id", nullable = false)
+    private Long photoId;
+
+    @Column(nullable = false)
+    private String text;
+
+    // Constructors
+    public PhotoText() {}
+
+    public PhotoText(Long photoId, String text) {
+        this.photoId = photoId;
+        this.text = text;
     }
 
     // Getters and setters
@@ -14,15 +29,19 @@ public class PhotoText {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public Long getPhotoId() {
+        return photoId;
     }
 
-    public String[] getTexts() {
-        return texts;
+    public void setPhotoId(Long photoId) {
+        this.photoId = photoId;
     }
 
-    public void setTexts(String[] texts) {
-        this.texts = texts;
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }

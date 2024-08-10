@@ -56,6 +56,14 @@
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
+        
+        <!-- Google Cloud Vision API Client Lib -->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-vision</artifactId>
+            <version>3.22.0</version>
+        </dependency>
+
 
     
     </dependencies>
