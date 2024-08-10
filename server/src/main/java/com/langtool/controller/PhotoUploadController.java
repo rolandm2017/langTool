@@ -47,7 +47,6 @@ public class PhotoUploadController {
         } 
     }
 
-    // New: Chunked upload endpoint
     @PostMapping("/upload/chunk")
     public ResponseEntity<String> uploadPhotoChunk(
             @RequestParam("file") MultipartFile file,
@@ -59,23 +58,18 @@ public class PhotoUploadController {
             return ResponseEntity.badRequest().body("Chunk is empty.");
         }
 
-        String fileExtension = getFileExtension(fileName);
-        if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
-            return ResponseEntity.badRequest().body("File type not allowed. Allowed types: " + String.join(", ", ALLOWED_EXTENSIONS));
-        }
-
         try {
-            // New: Save the chunk
             photoUploadService.savePhotoChunk(file, fileName, chunkNumber, totalChunks);
             
             if (chunkNumber == totalChunks - 1) {
-                // New: All chunks received, process the complete file
-                photoUploadService.processCompletePhoto(fileName);
-                return ResponseEntity.ok("File uploaded and processed successfully");
+                // All chunks received
+                return ResponseEntity.ok("File upload complete: " + fileName);
             } else {
-                return ResponseEntity.ok("Chunk received successfully");
+                // Chunk received, but not the last one
+                return ResponseEntity.ok("Chunk " + (chunkNumber + 1) + " of " + totalChunks + " received for " + fileName);
             }
         } catch (IOException e) {
+            // ## look here ##
             return ResponseEntity.internalServerError().body("Error uploading chunk: " + e.getMessage());
         }
     }

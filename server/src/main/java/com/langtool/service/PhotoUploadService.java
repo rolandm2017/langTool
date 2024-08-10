@@ -43,11 +43,10 @@ public class PhotoUploadService {
     public void savePhotos(MultipartFile[] files) throws Exception {
         int someUserId = 500; // get from user auth later
         
-        String userFolderPath = BASE_UPLOAD_DIR + "/" + Integer.toString(someUserId);
+        String userFolderPath = BASE_UPLOAD_DIR + File.separator + Integer.toString(someUserId);
         
         File userFolder = new File(userFolderPath);
 
-        // If the user's folder doesn't exist, create one
         createUserFolderIfNotExists(userFolder, someUserId);
 
         // Create a list to hold files that don't already exist
@@ -56,12 +55,9 @@ public class PhotoUploadService {
         // Check each file and add to filesToParse if it doesn't exist
         for (MultipartFile file : files) {
             String originalFilename = file.getOriginalFilename();
-            Path filePath = Paths.get(userFolderPath, originalFilename);
 
-            boolean fileWithThatNameExists = Files.exists(filePath);
-            if (!fileWithThatNameExists) {
-                filesToParse.add(file);
-            }
+            File destFile = new File(userFolder.getAbsolutePath() + File.separator + originalFilename);
+            file.transferTo(destFile);
         }
         
         // For each new file:
@@ -85,7 +81,6 @@ public class PhotoUploadService {
                 fileAlreadyExists = Files.exists(filePath); 
             }
 
-            // Write the file
             Files.write(filePath, file.getBytes());
         }
 
@@ -103,21 +98,7 @@ public class PhotoUploadService {
         }
     }
 
-    private String[] passPhotoToGoogleCloudVision(File photo) {
-        // todo: keep the api query separate.
-        try {
-            String response = googleCloudVisionApi.analyzeImageUsingGoogle(photo);
-            String[] words = response.split(" ");
-            for (String item : words) {
-                System.out.println("Word from google: " + item);
-            }
-            return words;
-        } catch (IOException e) {
-            String errorMessage = "Error analyzing image: " + e.getMessage();
-            System.out.println(errorMessage); // Console log the error message
-            return new String[]{errorMessage}; // Return the error message in a single-element array
-        }
-    }
+   
 
     private void createUserFolderIfNotExists(File folder, int userId) throws IOException {
         if (!folder.exists()) {
@@ -139,9 +120,11 @@ public class PhotoUploadService {
         return convertedFile;
     }
 
-    // New: Method to save a chunk of a file
     public void savePhotoChunk(MultipartFile file, String fileName, int chunkNumber, int totalChunks) throws IOException {
-        File tempDir = new File(TEMP_DIR + fileName);
+        int someUserId = 500; // get from user auth later
+        
+        String userTempDir = TEMP_DIR + File.separator + Integer.toString(someUserId) + File.separator + fileName;
+        File tempDir = new File(userTempDir);
         if (!tempDir.exists()) {
             tempDir.mkdirs();
         }
@@ -150,12 +133,22 @@ public class PhotoUploadService {
         try (FileOutputStream fos = new FileOutputStream(chunk)) {
             fos.write(file.getBytes());
         }
+
+        if (chunkNumber == totalChunks - 1) {
+            processCompletePhoto(fileName, someUserId);
+        }
     }
 
-    // New: Method to process the complete file when all chunks are received
-    public void processCompletePhoto(String fileName) throws IOException {
-        File tempDir = new File(TEMP_DIR + fileName);
-        File outputFile = new File(BASE_UPLOAD_DIR + fileName);
+    private void processCompletePhoto(String fileName, int userId) throws IOException {
+        String userTempDir = TEMP_DIR + File.separator + Integer.toString(userId) + File.separator + fileName;
+        String userUploadDir = BASE_UPLOAD_DIR + File.separator + Integer.toString(userId);
+        
+        File tempDir = new File(userTempDir);
+        File outputFile = new File(userUploadDir + File.separator + fileName);
+
+        if (!outputFile.getParentFile().exists()) {
+            outputFile.getParentFile().mkdirs();
+        }
 
         try (FileOutputStream fos = new FileOutputStream(outputFile)) {
             File[] chunks = tempDir.listFiles();
@@ -184,5 +177,22 @@ public class PhotoUploadService {
             }
         }
         directory.delete();
+    }
+
+
+    private String[] passPhotoToGoogleCloudVision(File photo) {
+        // keep the api query separate.
+        try {
+            String response = googleCloudVisionApi.analyzeImageUsingGoogle(photo);
+            String[] words = response.split(" ");
+            for (String item : words) {
+                System.out.println("Word from google: " + item);
+            }
+            return words;
+        } catch (IOException e) {
+            String errorMessage = "Error analyzing image: " + e.getMessage();
+            System.out.println(errorMessage); // Console log the error message
+            return new String[]{errorMessage}; // Return the error message in a single-element array
+        }
     }
 }
