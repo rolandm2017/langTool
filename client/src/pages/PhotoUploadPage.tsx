@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, CSSProperties } from "react"
 import { useDropzone, FileRejection } from "react-dropzone"
+import usePhotoUpload from "../api/useUploadPhotos.api"
 
 interface PhotoUploaderProps {
     maxFiles?: number
@@ -8,12 +9,15 @@ interface PhotoUploaderProps {
 const PhotoUploaderPage: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
     const [files, setFiles] = useState<File[]>([])
 
+    const { uploadPhotos, progress, isUploading, error } = usePhotoUpload()
+
     const onDrop = useCallback(
         (acceptedFiles: File[], fileRejections: FileRejection[]) => {
             setFiles((prevFiles) =>
                 [...prevFiles, ...acceptedFiles].slice(0, maxFiles)
             )
-            uploadFiles(acceptedFiles)
+            // todo: show GUI displaying files, require "confirm ok" button press
+            startUploadFiles(acceptedFiles)
         },
         [maxFiles]
     )
@@ -27,29 +31,12 @@ const PhotoUploaderPage: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
         multiple: true,
     })
 
-    const uploadFiles = async (filesToUpload: File[]) => {
-        const formData = new FormData()
-        filesToUpload.forEach((file) => {
-            formData.append("photos", file)
-        })
-
-        try {
-            const response = await fetch("YOUR_UPLOAD_API_ENDPOINT", {
-                method: "POST",
-                body: formData,
-            })
-
-            if (response.ok) {
-                console.log("Files uploaded successfully")
-                // Handle successful upload (e.g., show a success message)
-            } else {
-                console.error("Upload failed")
-                // Handle upload failure
-            }
-        } catch (error) {
-            console.error("Error uploading files:", error)
-            // Handle error
-        }
+    const startUploadFiles = async (filesToUpload: File[]) => {
+        // const formData = new FormData()
+        // filesToUpload.forEach((file) => {
+        // formData.append("photos", file)
+        // })
+        uploadPhotos(filesToUpload)
     }
 
     return (
@@ -83,7 +70,7 @@ const PhotoUploaderPage: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
     )
 }
 
-const dropzoneStyles: React.CSSProperties = {
+const dropzoneStyles: CSSProperties = {
     border: "2px dashed #cccccc",
     borderRadius: "4px",
     padding: "20px",

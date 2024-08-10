@@ -1,14 +1,38 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, CSSProperties } from "react"
 import RatingList from "../components/RatingList"
+
+import usePostDifficultyRating from "../api/postDifficultyRating.api"
 
 type Difficulty = "impossible" | "hard" | "medium" | "easy"
 
+interface Word {
+    text: string
+    wordId: number
+}
+
 const WordRatingPage: React.FC = () => {
-    const [word, setWord] = useState<string>("")
+    const [word, setWord] = useState<Word>({ text: "", wordId: 0 })
     const [rating, setRating] = useState<Difficulty | null>(null)
 
-    // Simulated word list - replace with your actual word source
-    const words = ["apple", "banana", "chromatic", "dexterity", "ephemeral"]
+    const words: Word[] = [
+        { text: "apple", wordId: 1 },
+        { text: "banana", wordId: 2 },
+        { text: "chromatic", wordId: 3 },
+        { text: "dexterity", wordId: 4 },
+        { text: "ephemeral", wordId: 5 },
+        { text: "fandango", wordId: 6 },
+        { text: "galvanize", wordId: 7 },
+        { text: "harmonious", wordId: 8 },
+        { text: "ineffable", wordId: 9 },
+        { text: "juxtapose", wordId: 10 },
+        { text: "kaleidoscope", wordId: 11 },
+        { text: "labyrinthine", wordId: 12 },
+        { text: "mellifluous", wordId: 13 },
+        { text: "nebulous", wordId: 14 },
+        { text: "obfuscate", wordId: 15 },
+    ]
+
+    const { postDifficultyRating, isLoading, error } = usePostDifficultyRating()
 
     useEffect(() => {
         // Load a random word when the component mounts
@@ -31,6 +55,7 @@ const WordRatingPage: React.FC = () => {
 
     const handleKeyPress = (event: KeyboardEvent) => {
         const key = event.key
+
         let newRating: Difficulty | null = null
 
         switch (key) {
@@ -49,6 +74,14 @@ const WordRatingPage: React.FC = () => {
             default:
                 return // Ignore other keys
         }
+        console.log("key: ", key)
+
+        const keyAsInt = parseInt(key, 10)
+        if (!keyAsInt) {
+            throw new Error("Key not from valid set")
+        }
+
+        postDifficultyRating(word.wordId, keyAsInt)
 
         setRating(newRating)
 
@@ -73,7 +106,7 @@ const WordRatingPage: React.FC = () => {
         <div style={styles.container}>
             <h1 style={styles.title}>Word Rating</h1>
             <div style={styles.wordContainer}>
-                <h2 style={styles.word}>{word}</h2>
+                <h2 style={styles.word}>{word.text}</h2>
             </div>
             <div style={styles.instructionsContainer}>
                 <p style={styles.instructions}>
@@ -95,11 +128,11 @@ const WordRatingPage: React.FC = () => {
     )
 }
 
-const styles = {
+const styles: { [key: string]: CSSProperties } = {
     container: {
         padding: "40px 0 0 0",
         display: "flex",
-        flexDirection: "column" as const,
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "start",
         height: "100vh",
@@ -122,7 +155,7 @@ const styles = {
         margin: 0,
     },
     instructionsContainer: {
-        textAlign: "center" as const,
+        textAlign: "center",
         marginBottom: "20px",
     },
     instructions: {
@@ -140,7 +173,7 @@ const styles = {
         padding: "10px 20px",
         borderRadius: "5px",
         fontSize: "1.2em",
-        fontWeight: "bold" as const,
+        fontWeight: "bold",
         color: "white",
     },
 }

@@ -11,8 +11,10 @@ const NavigationEntry: React.FC<NavigationEntryProps> = ({
     children,
 }) => {
     return (
-        <li className="mr-4 border-2 border-black">
-            <Link to={toUrl}>{children}</Link>
+        <li className="mr-4 px-3 py-1 bg-blue-100 rounded-sm shadow-sm">
+            <Link className="text-black" to={toUrl}>
+                {children}
+            </Link>
         </li>
     )
 }

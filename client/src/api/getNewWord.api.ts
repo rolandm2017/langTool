@@ -38,6 +38,7 @@ const useGetNewWord = (): UseFetchNewWordResult => {
             setError(
                 err instanceof Error ? err.message : "An unknown error occurred"
             )
+            throw err
         } finally {
             setIsLoading(false)
         }

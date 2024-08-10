@@ -63,7 +63,7 @@ public class WordController {
         System.out.println("Number of words submitted: " + words.getWords().length);
 
         CsvOutput csv = this.wordsService.generateCsvFrom(words);
-        return new RespponseEntity<CsvOutput>(csv, HttpStatus.ACCEPTED);
+        return new ResponseEntity<CsvOutput>(csv, HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/{id}")

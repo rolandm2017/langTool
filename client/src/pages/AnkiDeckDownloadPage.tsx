@@ -91,7 +91,7 @@ const styles = {
         border: "none",
         color: "white",
         padding: "15px 32px",
-        textAlign: "center" as const,
+        textAlign: "center",
         textDecoration: "none",
         display: "inline-block",
         fontSize: "16px",

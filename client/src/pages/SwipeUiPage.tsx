@@ -21,11 +21,13 @@ const SwipeUiPage: React.FC = () => {
     const handleKeyPress = useCallback((event: KeyboardEvent) => {
         if (event.key === "ArrowLeft") {
             // Left arrow: Not known
+            putWordUpdate(wordId, swipe.unknown)
             setResult("Not Known")
             moveToNextWord()
         } else if (event.key === "ArrowRight") {
             // Right arrow: Known
             setResult("Known")
+            putWordUpdate(wordId, swipe.known)
             moveToNextWord()
         }
     }, [])
@@ -78,7 +80,7 @@ const styles = {
     container: {
         padding: "40px 0 0 0",
         display: "flex",
-        flexDirection: "column" as const,
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "start",
         height: "100vh",
@@ -101,7 +103,7 @@ const styles = {
         margin: 0,
     },
     instructionsContainer: {
-        textAlign: "center" as const,
+        textAlign: "center",
         marginBottom: "20px",
     },
     instructions: {
@@ -112,7 +114,7 @@ const styles = {
         padding: "10px 20px",
         borderRadius: "5px",
         fontSize: "1.2em",
-        fontWeight: "bold" as const,
+        fontWeight: "bold",
         color: "white",
         marginBottom: "20px",
     },
