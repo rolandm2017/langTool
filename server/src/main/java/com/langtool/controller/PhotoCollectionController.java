@@ -6,12 +6,12 @@ import java.util.*;
 import com.langtool.object.PhotoText;
 
 @RestController
-@RequestMapping("/api/photosets")
-public class PhotoSetController {
+@RequestMapping("/api/photocollections")
+public class PhotoCollectionController {
 
-    @GetMapping("/{photoSetId}")
-    public List<PhotoText> getPhotoTexts(@PathVariable Long photoSetId) {
-        // TODO: Implement the logic to fetch photo texts based on the photoSetId
+    @GetMapping("/{photoCollectionId}")
+    public List<PhotoText> getPhotoTexts(@PathVariable Long photoCollectionId) {
+        // TODO: Implement the logic to fetch photo texts based on the photoCollectionId
         // This is a mock implementation
         List<PhotoText> photoTexts = new ArrayList<>();
         photoTexts.add(new PhotoText(1L, new String[]{"Text 1", "Text 2"}));

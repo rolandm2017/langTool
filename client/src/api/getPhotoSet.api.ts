@@ -1,21 +1,24 @@
 import axios from "axios"
 
-interface PhotoSetResponse {
+interface PhotoCollectionResponse {
     success: boolean
     message: string
-    photoSet?: string[][]
+    photoCollection?: string[][]
 }
 
-const fetchPhotoSet = async (
-    photoSetId: string
+const fetchPhotoCollection = async (
+    photoCollectionId: string
 ): Promise<string[][] | null> => {
     try {
-        const response = await axios.get<PhotoSetResponse>("/api/photo-sets", {
-            params: { photoSetId },
-        })
+        const response = await axios.get<PhotoCollectionResponse>(
+            "/api/photo-sets",
+            {
+                params: { photoCollectionId },
+            }
+        )
 
-        if (response.data.success && response.data.photoSet) {
-            return response.data.photoSet
+        if (response.data.success && response.data.photoCollection) {
+            return response.data.photoCollection
         } else {
             console.error("Failed to fetch photo set:", response.data.message)
             return null
@@ -33,4 +36,4 @@ const fetchPhotoSet = async (
     }
 }
 
-export default fetchPhotoSet
+export default fetchPhotoCollection

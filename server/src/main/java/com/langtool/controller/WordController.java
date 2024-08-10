@@ -62,7 +62,7 @@ public class WordController {
     public ResponseEntity<CsvOutput> generateCsv(@RequestBody BatchWordDto words) {
         System.out.println("Number of words submitted: " + words.getWords().length);
 
-        CsvOutput csv = this.wordsService.generateCsvFrom(words);
+        CsvOutput csv = this.wordService.generateCsvFrom(words);
         return new ResponseEntity<CsvOutput>(csv, HttpStatus.ACCEPTED);
     }
 

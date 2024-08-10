@@ -5,7 +5,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "photos")
-public class Photo {
+public class PhotoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,9 +19,9 @@ public class Photo {
     // private List<String> extractedTexts;
 
     // Constructors
-    public Photo() {}
+    public PhotoEntity() {}
 
-    public Photo(String filePath, List<String> extractedTexts) {
+    public PhotoEntity(String filePath, List<String> extractedTexts) {
         this.filePath = filePath;
         // this.extractedTexts = extractedTexts;
     }

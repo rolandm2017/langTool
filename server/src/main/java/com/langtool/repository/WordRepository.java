@@ -1,6 +1,6 @@
 package com.langtool.repository;
 
-import com.langtool.model.Word;
+import com.langtool.model.WordEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,17 +9,17 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface WordRepository extends JpaRepository<Word, Long> {
-    Word findByOrigin(String origin);
+public interface WordRepository extends JpaRepository<WordEntity, Long> {
+    WordEntity findByOrigin(String origin);
 
-    @Query("SELECT w.mentions FROM Word w WHERE w.origin = :origin")
+    @Query("SELECT w.mentions FROM WordEntity w WHERE w.origin = :origin")
     Integer findMentionsByOrigin(@Param("origin") String origin);
 
-    @Query("SELECT w FROM Word w WHERE w.origin IN :origins")
-    List<Word> findAllByOriginIn(@Param("origins") List<String> origins);
+    @Query("SELECT w FROM WordEntity w WHERE w.origin IN :origins")
+    List<WordEntity> findAllByOriginIn(@Param("origins") List<String> origins);
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE word SET mentions = mentions + 1 WHERE origin = ANY(:origins)", nativeQuery = true)
+    @Query(value = "UPDATE word_entity SET mentions = mentions + 1 WHERE origin = ANY(:origins)", nativeQuery = true)
     int incrementMentionsForWords(@Param("origins") String[] origins);
 }

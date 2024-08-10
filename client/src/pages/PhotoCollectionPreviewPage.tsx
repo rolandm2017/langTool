@@ -20,14 +20,7 @@ interface FrequencyDistribution {
     count: number
 }
 
-const styles = {
-    title: {
-        fontSize: "2.5em",
-        marginBottom: "20px",
-    },
-}
-
-const PhotoSetPreviewPage: React.FC = () => {
+const PhotoCollectionPreviewPage: React.FC = () => {
     const chartRef = useRef<HTMLCanvasElement | null>(null)
     const chartInstanceRef = useRef<Chart | null>(null)
 
@@ -151,13 +144,26 @@ const PhotoSetPreviewPage: React.FC = () => {
     }, [])
 
     return (
-        <div style={{ width: "80%", margin: "0 auto" }}>
-            <div>
-                <h1 style={styles.title}>Photo Set Preview</h1>
+        <div style={styles.container}>
+            <div style={{ width: "80%", margin: "0 auto" }}>
+                <div>
+                    <h1 style={styles.title}>Photo Set Preview</h1>
+                </div>
+                <canvas ref={chartRef}></canvas>
             </div>
-            <canvas ref={chartRef}></canvas>
         </div>
     )
 }
 
-export default PhotoSetPreviewPage
+const styles = {
+    container: {
+        margin: "40px 0 0 0",
+        border: "4px solid red",
+    },
+    title: {
+        fontSize: "2.5em",
+        marginBottom: "20px",
+    },
+}
+
+export default PhotoCollectionPreviewPage

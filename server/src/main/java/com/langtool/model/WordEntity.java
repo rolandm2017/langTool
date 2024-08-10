@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-public class Word {
+public class WordEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

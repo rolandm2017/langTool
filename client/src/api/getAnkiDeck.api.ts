@@ -7,7 +7,7 @@ interface AnkiDeckResponse {
 }
 
 const getAnkiDeck = async (
-    idType: "ankiDeckId" | "photoSetId",
+    idType: "ankiDeckId" | "photoCollectionId",
     id: string
 ): Promise<File | null> => {
     try {

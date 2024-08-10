@@ -15,26 +15,45 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.langtool.object.PhotoText;
-import com.langtool.repository.PhotoSetRepository;
-
-import com.langtool.model.Photo;
+import com.langtool.repository.PhotoRepository;
+import com.langtool.repository.PhotoTextRepository;
+import com.langtool.model.PhotoEntity;
+import com.langtool.model.PhotoTextEntity;
 
 @Service
-class PhotoSetService {
+class PhotoCollectionService {
 
     @Autowired
-    private PhotoSetRepository photoSetRepository;
+    private PhotoRepository photoCollectionRepository;
+    @Autowired
+    private PhotoTextRepository photoTextRepository;
 
-    public List<PhotoText> getPhotoTexts(Long photoSetId) {
-        Optional<Photo> photoOptional = photoSetRepository.findById(photoSetId);
+    public List<PhotoText> getPhotoTexts(Long photoCollectionId) {
+        // A photo set is a set of photos. Or a "photo collection".
+        // Each entry has associated words.
+        // This exchanges the ID of the collection and gets back all the words in each entry.
+        Optional<PhotoEntity> photoOptional = photoCollectionRepository.findById(photoCollectionId);
         
         if (photoOptional.isPresent()) {
-            Photo photo = photoOptional.get();
-            return photo.getExtractedTexts().stream()
-                .map(text -> new PhotoText(photo.getId(), new String[]{text}))
-                .collect(Collectors.toList());
+            PhotoEntity photo = photoOptional.get();
+            Long photoId = photo.getId();
+            List<PhotoTextEntity> photoTexts = photoTextRepository.findAllByPhotoId(photoId);
+            List<PhotoText> texts = convertEntityToObj(photoTexts);
+            return texts;
+            // return photo.getExtractedTexts().stream()
+            //     .map(text -> new PhotoText(photo.getId(), new String[]{text}))
+            //     .collect(Collectors.toList());
         }
 
         return new ArrayList<>(); // Return empty list if photo not found
+    }
+
+    private List<PhotoText> convertEntityToObj(List<PhotoTextEntity> batch) {
+        List<PhotoText> created = new ArrayList<>();
+        for (PhotoTextEntity toConvert: batch) {
+            PhotoText converted = new PhotoText(toConvert.getId(), toConvert.getText().split(" "));
+            created.add(converted);
+        }
+        return created;
     }
 }

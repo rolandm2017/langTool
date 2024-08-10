@@ -5,9 +5,9 @@ import org.springframework.stereotype.Repository;
 import jakarta.persistence.*;
 import java.util.List;
 
-import com.langtool.model.Photo;
+import com.langtool.model.PhotoEntity;
 
 @Repository
-public interface PhotoSetRepository extends JpaRepository<Photo, Long> {
+public interface PhotoRepository extends JpaRepository<PhotoEntity, Long> {
     // The basic CRUD operations are automatically provided by JpaRepository
 }

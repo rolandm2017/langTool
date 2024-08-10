@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom"
 import LandingPage from "./pages/LandingPage"
 import AnkiDeckDownloadPage from "./pages/AnkiDeckDownloadPage"
 import PhotoUploaderPage from "./pages/PhotoUploadPage"
-import PhotoSetPreviewPage from "./pages/PhotoSetPreviewPage"
+import PhotoCollectionPreviewPage from "./pages/PhotoCollectionPreviewPage"
 import SwipeUiPage from "./pages/SwipeUiPage"
 import WordRatingPage from "./pages/WordRatingPage"
 
@@ -17,7 +17,7 @@ const routesOptions = {
     wordRating: "/wordRating", // pg 1 in hierarchy
     swipeUi: "/swipeUiPage", // pg 2 in hierarchy
     photoUpload: "/photoUpload", // pg 3 in hierarchy
-    photoSetPreview: "/photoSetPreview", // pg 4 in hierarchy
+    photoCollectionPreview: "/photoCollectionPreview", // pg 4 in hierarchy
     ankiDeckDownload: "/ankiDeckDownload", // pg 5 in hierarchy
 }
 
@@ -51,7 +51,9 @@ function App() {
                         <NavigationEntry toUrl={routesOptions.photoUpload}>
                             Photo Upload
                         </NavigationEntry>
-                        <NavigationEntry toUrl={routesOptions.photoSetPreview}>
+                        <NavigationEntry
+                            toUrl={routesOptions.photoCollectionPreview}
+                        >
                             Photo Set Preview
                         </NavigationEntry>
                         <NavigationEntry toUrl={routesOptions.ankiDeckDownload}>
@@ -93,8 +95,8 @@ function App() {
                         element={<AnkiDeckDownloadPage />}
                     />
                     <Route
-                        path={routesOptions.photoSetPreview}
-                        element={<PhotoSetPreviewPage />}
+                        path={routesOptions.photoCollectionPreview}
+                        element={<PhotoCollectionPreviewPage />}
                     />
                     <Route
                         path={routesOptions.photoUpload}

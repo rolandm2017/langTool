@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.langtool.client.GoogleCloudVisionApiService;
-import com.langtool.model.Photo;
-import com.langtool.repository.PhotoSetRepository;
+import com.langtool.model.PhotoEntity;
+import com.langtool.repository.PhotoRepository;
 import com.langtool.repository.PhotoTextRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Comparator;
 
 @Service
 public class PhotoUploadService {
@@ -31,10 +33,12 @@ public class PhotoUploadService {
     @Autowired
     private PhotoTextRepository photoTextRepository;
     @Autowired
-    private PhotoSetRepository photoSetRepository;
+    private PhotoRepository photoCollectionRepository;
 
     @Value("${file.upload-dir}")
     private String BASE_UPLOAD_DIR;
+    @Value("${file.temp-dir}")
+    private String TEMP_DIR;
 
     public void savePhotos(MultipartFile[] files) throws Exception {
         int someUserId = 500; // get from user auth later
@@ -90,8 +94,8 @@ public class PhotoUploadService {
             File converted = convertMultiPartToFile(file);
             String[] gatheredText = passPhotoToGoogleCloudVision(converted);
 
-            Photo newPhoto = new Photo(file.getOriginalFilename(), null);
-            Photo savedPhoto = photoSetRepository.save(newPhoto); // store the photo's path and get its id for the next write.
+            PhotoEntity newPhoto = new PhotoEntity(file.getOriginalFilename(), null);
+            PhotoEntity savedPhoto = photoCollectionRepository.save(newPhoto); // store the photo's path and get its id for the next write.
 
             Long newPhotoInsertId = savedPhoto.getId();
             // todo: store the gathered text
@@ -133,5 +137,52 @@ public class PhotoUploadService {
         fos.write(file.getBytes());
         fos.close();
         return convertedFile;
+    }
+
+    // New: Method to save a chunk of a file
+    public void savePhotoChunk(MultipartFile file, String fileName, int chunkNumber, int totalChunks) throws IOException {
+        File tempDir = new File(TEMP_DIR + fileName);
+        if (!tempDir.exists()) {
+            tempDir.mkdirs();
+        }
+
+        File chunk = new File(tempDir, "chunk_" + chunkNumber);
+        try (FileOutputStream fos = new FileOutputStream(chunk)) {
+            fos.write(file.getBytes());
+        }
+    }
+
+    // New: Method to process the complete file when all chunks are received
+    public void processCompletePhoto(String fileName) throws IOException {
+        File tempDir = new File(TEMP_DIR + fileName);
+        File outputFile = new File(BASE_UPLOAD_DIR + fileName);
+
+        try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+            File[] chunks = tempDir.listFiles();
+            if (chunks != null) {
+                Arrays.sort(chunks, Comparator.comparing(f -> Integer.parseInt(f.getName().split("_")[1])));
+                for (File chunk : chunks) {
+                    Files.copy(chunk.toPath(), fos);
+                }
+            }
+        }
+
+        // Clean up temp directory
+        deleteDirectory(tempDir);
+    }
+
+    // Helper method to delete a directory
+    private void deleteDirectory(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        directory.delete();
     }
 }

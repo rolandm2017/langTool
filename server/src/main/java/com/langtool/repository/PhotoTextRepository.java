@@ -6,11 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.langtool.model.PhotoText;
+import com.langtool.model.PhotoTextEntity;
+
+import java.util.List;
 
 
 @Repository
-public interface PhotoTextRepository extends JpaRepository<PhotoText, Long> {
+public interface PhotoTextRepository extends JpaRepository<PhotoTextEntity, Long> {
 
     @Modifying
     @Transactional
@@ -26,4 +28,7 @@ public interface PhotoTextRepository extends JpaRepository<PhotoText, Long> {
     @Transactional
     @Query(value = "INSERT INTO photo_texts (photo_id, text) SELECT :photoId, unnest(:texts)", nativeQuery = true)
     void insertMultiplePhotoTexts(Long photoId, String[] texts);
+
+    @Query(value = "SELECT * FROM photo_texts WHERE photo_id = :photoId", nativeQuery = true)
+    List<PhotoTextEntity> findAllByPhotoId(Long photoId);
 }

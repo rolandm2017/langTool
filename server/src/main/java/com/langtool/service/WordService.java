@@ -3,7 +3,7 @@ package com.langtool.service;
 import com.langtool.dto.BatchWordDto;
 import com.langtool.dto.CsvOutput;
 import com.langtool.dto.WordDto;
-import com.langtool.model.Word;
+import com.langtool.model.WordEntity;
 import com.langtool.object.GenericPair;
 import com.langtool.repository.WordRepository;
 
@@ -28,15 +28,15 @@ public class WordService {
     private TranslationService translationService;
 
     public List<WordDto> getAllWords() {
-        List<Word> words = wordRepository.findAll();
+        List<WordEntity> words = wordRepository.findAll();
          List<WordDto> wordDtoList = words.stream()
                                      .map(this::convertWordToDto)
                                      .collect(Collectors.toList());
         return wordDtoList;
     }
 
-    public Word saveWord(WordDto word) {
-        Word asEntity = this.convertDtoToWord(word);
+    public WordEntity saveWord(WordDto word) {
+        WordEntity asEntity = this.convertDtoToWord(word);
         Integer currentMentions = this.getCurrentMentionCount(asEntity);
         if (currentMentions == null) {
             currentMentions = 0;
@@ -45,16 +45,16 @@ public class WordService {
         return wordRepository.save(asEntity);
     }
 
-    public Word[] saveWords(BatchWordDto words) {
+    public WordEntity[] saveWords(BatchWordDto words) {
         
-        Word[] wordsToSave = this.convertBatchWordDtoToWords(words);
+        WordEntity[] wordsToSave = this.convertBatchWordDtoToWords(words);
     
-        List<Word> savedWords = wordRepository.saveAll(Arrays.asList(wordsToSave));
+        List<WordEntity> savedWords = wordRepository.saveAll(Arrays.asList(wordsToSave));
         
-        return savedWords.toArray(new Word[0]); // fixme: does this return the first word or all words?
+        return savedWords.toArray(new WordEntity[0]); // fixme: does this return the first word or all words?
     }
 
-    public Optional<Word> getWordById(Long id) {
+    public Optional<WordEntity> getWordById(Long id) {
         return wordRepository.findById(id);
     }
 
@@ -62,7 +62,7 @@ public class WordService {
         wordRepository.deleteById(id);
     }
 
-    private WordDto convertWordToDto(Word word) {
+    private WordDto convertWordToDto(WordEntity word) {
         WordDto wordDto = new WordDto();
         wordDto.setId(word.getId());
         wordDto.setOrigin(word.getOrigin());
@@ -71,8 +71,8 @@ public class WordService {
         return wordDto;
     }
 
-    private Word convertDtoToWord(WordDto wordDto) {
-        Word word = new Word();
+    private WordEntity convertDtoToWord(WordDto wordDto) {
+        WordEntity word = new WordEntity();
         word.setId(wordDto.getId());
         word.setOrigin(wordDto.getOrigin());
         word.setDateSubmitted(wordDto.getDateSubmitted());
@@ -80,37 +80,37 @@ public class WordService {
         return word;
     }
     
-    private Integer getCurrentMentionCount(Word word) {
+    private Integer getCurrentMentionCount(WordEntity word) {
         return this.wordRepository.findMentionsByOrigin(word.getOrigin());
     }
 
-    private Word[] convertBatchWordDtoToWords(BatchWordDto batchWordDto) {
+    private WordEntity[] convertBatchWordDtoToWords(BatchWordDto batchWordDto) {
     return Arrays.stream(batchWordDto.getWords())
         .map(wordString -> {
-            Word word = new Word();
+            WordEntity word = new WordEntity();
             word.setOrigin(wordString);
             word.setDateSubmitted(LocalDateTime.now());
             word.setNovelty(10);  // Default value, adjust as needed
             word.setMentions(1); // Initial submission counts as first mention
             return word;
         })
-        .toArray(Word[]::new);
+        .toArray(WordEntity[]::new);
     }
 
     public CsvOutput generateCsvFrom(BatchWordDto words) {
         // figure out which words are in the db already
-        List<Word> existingWords = this.findExistingWords(words);
+        List<WordEntity> existingWords = this.findExistingWords(words);
         // increment the words that are there already by 1
         this.wordRepository.incrementMentionsForWords(existingWords.stream()
-                                                        .map(Word::getOrigin)
+                                                        .map(WordEntity::getOrigin)
                                                         .toArray(String[]::new));
         // add the words that aren't in the db yet
-        List<Word> novelWords = this.findMissingWords(words);
+        List<WordEntity> novelWords = this.findMissingWords(words);
 
         // translate the novel words
         List<GenericPair> translatedPairs = new ArrayList<>();
             // todo - for word in novelWords, translate Fr->En
-        for (Word w: novelWords) {
+        for (WordEntity w: novelWords) {
             String fr = w.getOrigin();
             String en = this.translationService.translateFrToEn(fr);
             GenericPair paired = new GenericPair(en, fr);
@@ -128,18 +128,18 @@ public class WordService {
         return csvOutObj;
     }
 
-    public List<Word> findExistingWords(BatchWordDto inputWords) {
+    public List<WordEntity> findExistingWords(BatchWordDto inputWords) {
         List<String> wordList = Arrays.asList(inputWords.getWords());
         return wordRepository.findAllByOriginIn(wordList);
     }
 
-    public List<Word> findMissingWords(BatchWordDto inputWords) {
+    public List<WordEntity> findMissingWords(BatchWordDto inputWords) {
         List<String> wordList = Arrays.asList(inputWords.getWords());
         // todo: make this alphabetized for search efficiency
-        List<Word> existingWords = wordRepository.findAllByOriginIn(wordList);
+        List<WordEntity> existingWords = wordRepository.findAllByOriginIn(wordList);
         
-        List<Word> missingWords = new ArrayList<>();
-        for (Word wordToCheck: existingWords) {
+        List<WordEntity> missingWords = new ArrayList<>();
+        for (WordEntity wordToCheck: existingWords) {
             // fixme: is this optimized? best way to search for a text in an alphabetized string arr?
             if (wordList.contains(wordToCheck.getOrigin())) {
                 continue;
