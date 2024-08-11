@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.langtool.client.GoogleCloudVisionApiService;
+import com.langtool.client.PhotoToTextFacade;
 import com.langtool.model.PhotoEntity;
 import com.langtool.repository.PhotoRepository;
 import com.langtool.repository.PhotoTextRepository;
@@ -28,7 +29,7 @@ import java.util.Comparator;
 public class PhotoUploadService {
 
     @Autowired
-    private GoogleCloudVisionApiService googleCloudVisionApi;
+    private PhotoToTextFacade photoToTextFacade;
 
     @Autowired
     private PhotoTextRepository photoTextRepository;
@@ -183,7 +184,7 @@ public class PhotoUploadService {
     private String[] passPhotoToGoogleCloudVision(File photo) {
         // keep the api query separate.
         try {
-            String response = googleCloudVisionApi.analyzeImageUsingGoogle(photo);
+            String response = photoToTextFacade.convertPhotoToTextUsingGoogle(photo);
             String[] words = response.split(" ");
             for (String item : words) {
                 System.out.println("Word from google: " + item);
