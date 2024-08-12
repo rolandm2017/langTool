@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.annotation.PostConstruct;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,10 +28,19 @@ public class PhotoToTextFacade {
     @Value("${file.dummy-photos}")
     private String dummyPhotosPath;
 
-    private final String[] expectedFileNames = getFileNamesFromLesChatsFolder();
+    private String[] expectedFileNames;
+
+    private final GoogleCloudVisionApiService cloudVisionApi;
 
     @Autowired
-    GoogleCloudVisionApiService cloudVisionApi;
+    public PhotoToTextFacade(GoogleCloudVisionApiService cloudVisionApi) {
+        this.cloudVisionApi = cloudVisionApi;
+    }
+
+    @PostConstruct
+    public void init() {
+        expectedFileNames = getFileNamesFromLesChatsFolder();
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void logWarningOnStartup() {

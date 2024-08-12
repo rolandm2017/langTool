@@ -8,12 +8,12 @@ import { Input } from "../ui/input"
 
 interface PhotoCollectionProps {
     collection: Collection
-    onRename: (id: number, newLabel: string) => void
+    onRename: (id: string, newLabel: string) => void
 }
 
 interface PhotoCollectionsProps {
     collections: Collection[]
-    onRenameCollection: (idForRenaming: number, newLabel: string) => void
+    onRenameCollection: (idForRenaming: string, newLabel: string) => void
 }
 
 const PhotoCollection: React.FC<PhotoCollectionProps> = ({

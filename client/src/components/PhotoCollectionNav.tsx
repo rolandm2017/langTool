@@ -23,7 +23,7 @@ const ThreeStateNavToggle: React.FC<ThreeStateNavToggleProps> = ({
     ]
 
     const handleStateChange = (newState: PhotoCollectionPageState) => {
-        // setActiveState(newState)
+        setActiveState(newState)
         onStateChange(newState)
     }
 

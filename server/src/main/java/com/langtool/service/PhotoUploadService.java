@@ -3,7 +3,6 @@ package com.langtool.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.langtool.client.GoogleCloudVisionApiService;
 import com.langtool.client.PhotoToTextFacade;
 import com.langtool.model.PhotoEntity;
 import com.langtool.repository.PhotoRepository;
