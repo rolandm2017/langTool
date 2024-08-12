@@ -27,6 +27,8 @@ public class PhotoToTextFacade {
 
     @Value("${file.dummy-photos}")
     private String dummyPhotosPath;
+    @Value("${file.csv-db-path}")
+    private String csvDbPath;
 
     private String[] expectedFileNames;
 
@@ -81,12 +83,19 @@ public class PhotoToTextFacade {
     }
 
     private String[] getFileNamesFromLesChatsFolder() {
-        File directory = new File(dummyPhotosPath);
-        return directory.list();
+        // File directory = new File(dummyPhotosPath);
+        // return directory.list();
+        String[] filenames = new String[31];
+        for (int i = 1; i <= 31; i++) {
+            filenames[i - 1] = "lesChats - " + i + ".png";
+        }
+        return filenames;
     }
 
     private String getAssociatedCsvForFile(String fileName) throws IOException {
-        String csvPath = dummyPhotosPath + fileName;
+        String csvDbEnding = ".png_as_text.csv";
+        String csvPath = csvDbPath + "/" + fileName.split("\\.")[0] + csvDbEnding;
+        logger.info("Opening " + csvPath);
         String csvContent = new String(Files.readAllBytes(Paths.get(csvPath)));
         return csvContent;
     }

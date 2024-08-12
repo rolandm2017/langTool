@@ -125,16 +125,17 @@ public class PhotoUploadService {
         LocalDateTime creationTime = LocalDateTime.now();
        
         List<Long> photoIds = new ArrayList<>();
-
+        System.out.println("128rm");
         try (FileOutputStream fos = new FileOutputStream(outputFile)) {
             File[] chunks = tempDir.listFiles();
             if (chunks != null) {
                 File reassembledPhoto = reassemblePhotoChunks(fileName, chunks, fos);
-                
+                System.out.println(reassembledPhoto.getName() + " 133rm");
                 PhotoEntity savedPhoto = writeNewPhotoToDb(fileName, creationTime);
                 photoIds.add(savedPhoto.getId());
                 
                 // process photo text
+                System.out.println("138rm 138rm 138rm 138rm ");
                 logger.info("Passing photo to cloud vision");
                 String[] gatheredTextArr = passPhotoToGoogleCloudVision(reassembledPhoto);
                 
@@ -169,7 +170,12 @@ public class PhotoUploadService {
         Arrays.sort(chunks, Comparator.comparing(f -> Integer.parseInt(f.getName().split("_")[1])));
 
         // Create a temporary file for the reassembled photo
-        File reassembledFile = File.createTempFile(nameAndExtension[0], "." + nameAndExtension[1]);
+        System.out.println("=== 173rm === 173rm");
+        System.out.println(nameAndExtension[0]);
+        System.out.println(nameAndExtension[1]);
+
+        // Create a file with the exact name in the current directory
+        File reassembledFile = new File(nameAndExtension[0] + "." + nameAndExtension[1]);
         reassembledFile.deleteOnExit(); // Ensures the temp file is deleted when the JVM exits
 
         // Copy chunks directly to the reassembledFile
@@ -252,7 +258,7 @@ public class PhotoUploadService {
             String response = photoToTextFacade.convertPhotoToTextUsingGoogle(photo);
             String[] words = response.split(" ");
             for (String item : words) {
-                System.out.println("Word from google: " + item);
+                System.out.println(photo.getName() + " -> Word from google: " + item);
             }
             return words;
         } catch (IOException e) {

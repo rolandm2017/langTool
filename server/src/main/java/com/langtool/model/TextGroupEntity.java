@@ -13,7 +13,7 @@ public class TextGroupEntity {
     @Column(name = "photo_id", nullable = false)
     private Long photoId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
 
     // Constructors
