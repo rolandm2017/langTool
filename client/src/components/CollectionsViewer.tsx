@@ -1,15 +1,28 @@
 import React, { useState } from "react"
 import { ChevronDown, ChevronUp, Edit2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
-// TODO: 1. use shadcn/ui for everything.
-// 2. fix up this collectionsViewer thing: https://claude.ai/chat/24229e39-d95f-4e0f-b5ec-c230e5f95fff
+import { Collection } from "@/interface/Collection.int"
+import { Photo } from "@/interface/Photo.int"
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
 
-const PhotoCollection = ({ collection, onRename }) => {
-    const [isExpanded, setIsExpanded] = useState(false)
-    const [isRenaming, setIsRenaming] = useState(false)
-    const [newLabel, setNewLabel] = useState(collection.label)
+interface PhotoCollectionProps {
+    collection: Collection
+    onRename: (id: string, newLabel: string) => void
+}
+
+interface PhotoCollectionsProps {
+    collections: Collection[]
+    onRenameCollection: (id: string, newLabel: string) => void
+}
+
+const PhotoCollection: React.FC<PhotoCollectionProps> = ({
+    collection,
+    onRename,
+}) => {
+    const [isExpanded, setIsExpanded] = useState<boolean>(false)
+    const [isRenaming, setIsRenaming] = useState<boolean>(false)
+    const [newLabel, setNewLabel] = useState<string>(collection.label)
 
     const handleRename = () => {
         onRename(collection.id, newLabel)
@@ -23,7 +36,9 @@ const PhotoCollection = ({ collection, onRename }) => {
                     <div className="flex items-center space-x-2">
                         <Input
                             value={newLabel}
-                            onChange={(e) => setNewLabel(e.target.value)}
+                            onChange={(
+                                e: React.ChangeEvent<HTMLInputElement>
+                            ) => setNewLabel(e.target.value)}
                             className="w-48"
                         />
                         <Button onClick={handleRename} size="sm">
@@ -58,8 +73,8 @@ const PhotoCollection = ({ collection, onRename }) => {
             </div>
             {isExpanded && (
                 <ul className="list-disc pl-6">
-                    {collection.photos.map((photo, index) => (
-                        <li key={index}>{photo}</li>
+                    {collection.photos.map((photo) => (
+                        <li key={photo.id}>{photo.url}</li>
                     ))}
                 </ul>
             )}
@@ -67,7 +82,10 @@ const PhotoCollection = ({ collection, onRename }) => {
     )
 }
 
-const PhotoCollections = ({ collections, onRenameCollection }) => {
+const PhotoCollections: React.FC<PhotoCollectionsProps> = ({
+    collections,
+    onRenameCollection,
+}) => {
     return (
         <div className="space-y-4">
             <h2 className="text-2xl font-bold mb-4">Photo Collections</h2>
