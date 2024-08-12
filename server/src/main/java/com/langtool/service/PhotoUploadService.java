@@ -10,6 +10,7 @@ import com.langtool.repository.PhotoTextRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +35,7 @@ public class PhotoUploadService {
     @Autowired
     private PhotoTextRepository photoTextRepository;
     @Autowired
-    private PhotoRepository photoCollectionRepository;
+    private PhotoRepository photoRepository;
 
     @Value("${file.upload-dir}")
     private String BASE_UPLOAD_DIR;
@@ -42,6 +44,8 @@ public class PhotoUploadService {
 
     public void savePhotos(MultipartFile[] files) throws Exception {
         int someUserId = 500; // get from user auth later
+
+        LocalDateTime creationTime = LocalDateTime.now();
         
         String userFolderPath = BASE_UPLOAD_DIR + File.separator + Integer.toString(someUserId);
         
@@ -87,14 +91,16 @@ public class PhotoUploadService {
         // Now gather the text from the photos
         for (MultipartFile file: filesToParse) {
             File converted = convertMultiPartToFile(file);
-            String[] gatheredText = passPhotoToGoogleCloudVision(converted);
+            String[] gatheredTextArr = passPhotoToGoogleCloudVision(converted);
+            List<String> gatheredText = Arrays.asList(gatheredTextArr);
 
-            PhotoEntity newPhoto = new PhotoEntity(file.getOriginalFilename(), null);
-            PhotoEntity savedPhoto = photoCollectionRepository.save(newPhoto); // store the photo's path and get its id for the next write.
+            // public PhotoEntity(String filePath, LocalDateTime creationTime, List<String> extractedTexts) {
+            PhotoEntity newPhoto = new PhotoEntity(file.getOriginalFilename(), creationTime, gatheredText);
+            PhotoEntity savedPhoto = photoRepository.save(newPhoto); // store the photo's path and get its id for the next write.
 
             Long newPhotoInsertId = savedPhoto.getId();
             // todo: store the gathered text
-            photoTextRepository.insertMultiplePhotoTexts(newPhotoInsertId, gatheredText);
+            photoTextRepository.insertMultiplePhotoTexts(newPhotoInsertId, gatheredTextArr);
         }
     }
 

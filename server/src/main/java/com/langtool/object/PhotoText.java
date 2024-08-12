@@ -2,10 +2,12 @@ package com.langtool.object;
 
 public class PhotoText {
     private Long id;
+    private String fileName;
     private String[] texts;
 
-    public PhotoText(Long id, String[] texts) {
+    public PhotoText(Long id, String fileName, String[] texts) {
         this.id = id;
+        this.fileName = fileName;
         this.texts = texts;
     }
 
@@ -16,6 +18,14 @@ public class PhotoText {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+    
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String[] getTexts() {

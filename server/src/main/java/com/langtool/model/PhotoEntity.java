@@ -1,6 +1,8 @@
 package com.langtool.model;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -13,6 +15,11 @@ public class PhotoEntity {
     @Column(nullable = false)
     private String filePath;
 
+    @Column(nullable = false)
+    private LocalDateTime creationTime;
+
+    // TODO: add a "collectionLabel" property.
+
     // @ElementCollection
     // @CollectionTable(name = "photo_texts", joinColumns = @JoinColumn(name = "photo_id"))
     // @Column(name = "text")
@@ -21,8 +28,9 @@ public class PhotoEntity {
     // Constructors
     public PhotoEntity() {}
 
-    public PhotoEntity(String filePath, List<String> extractedTexts) {
+    public PhotoEntity(String filePath, LocalDateTime creationTime, List<String> extractedTexts) {
         this.filePath = filePath;
+        this.creationTime = creationTime;
         // this.extractedTexts = extractedTexts;
     }
 
@@ -37,6 +45,14 @@ public class PhotoEntity {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public LocalDateTime getCreationTime() {
+        return creationTime;
+    }
+    
+    public void setCreationTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime;
     }
 
     // public List<String> getExtractedTexts() {
