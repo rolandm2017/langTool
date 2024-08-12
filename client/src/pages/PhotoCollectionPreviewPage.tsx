@@ -9,6 +9,7 @@ import {
     ChartData,
     ChartOptions,
 } from "chart.js/auto"
+import ThreeStateNavToggle from "../components/PhotoCollectionNav"
 
 interface WordFrequency {
     word: string
@@ -149,6 +150,7 @@ const PhotoCollectionPreviewPage: React.FC = () => {
                 <div>
                     <h1 style={styles.title}>Photo Set Preview</h1>
                 </div>
+                <ThreeStateNavToggle />
                 <canvas ref={chartRef}></canvas>
             </div>
         </div>
