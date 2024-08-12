@@ -1,3 +1,6 @@
 application.properties
 textDb
 dummyPhotos
+
+/static/temp/*/ 
+/static/upload/*/

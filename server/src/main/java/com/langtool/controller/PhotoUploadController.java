@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.langtool.dto.PhotoDto;
 import com.langtool.service.PhotoUploadService;
 
 import java.io.IOException;
@@ -19,6 +20,17 @@ public class PhotoUploadController {
     
     @Autowired 
     private PhotoUploadService photoUploadService;
+
+    @GetMapping("/all")
+    public ResponseEntity<List<PhotoDto>> getAllPhotos() {
+        List<PhotoDto> allUploadedPhotos = photoUploadService.getAllPhotos();
+        System.out.println("Number of photos: " + allUploadedPhotos.size());
+        return ResponseEntity
+            .ok()
+            .header("Custom-Header", "Value")
+            .body(allUploadedPhotos);
+    }
+
 
     @PostMapping("/upload/small/files")
     public ResponseEntity<String> uploadSmallPhotos(@RequestParam("files") MultipartFile[] files) {
@@ -40,7 +52,7 @@ public class PhotoUploadController {
         }
 
         try { 
-            photoUploadService.savePhotos(files); 
+            photoUploadService.savePhotosWithSmallFileSizes(files); 
             return ResponseEntity.ok("Files uploaded successfully");
         } catch (Exception e) { 
             return ResponseEntity.internalServerError().body("Error uploading files: " + e.getMessage()); 

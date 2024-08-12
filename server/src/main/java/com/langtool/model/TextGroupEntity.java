@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 
 
 @Entity
-@Table(name = "photo_texts")
-public class PhotoTextEntity {
+@Table(name = "text_groups")
+public class TextGroupEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,9 +17,9 @@ public class PhotoTextEntity {
     private String text;
 
     // Constructors
-    public PhotoTextEntity() {}
+    public TextGroupEntity() {}
 
-    public PhotoTextEntity(Long photoId, String text) {
+    public TextGroupEntity(Long photoId, String text) {
         this.photoId = photoId;
         this.text = text;
     }

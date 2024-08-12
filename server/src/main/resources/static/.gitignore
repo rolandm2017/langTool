@@ -3,3 +3,6 @@
 *.jpeg
 *.gif
 *.png
+
+/temp/*/ 
+/upload/*/

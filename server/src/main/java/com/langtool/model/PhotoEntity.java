@@ -28,7 +28,7 @@ public class PhotoEntity {
     // Constructors
     public PhotoEntity() {}
 
-    public PhotoEntity(String filePath, LocalDateTime creationTime, List<String> extractedTexts) {
+    public PhotoEntity(String filePath, LocalDateTime creationTime) {
         this.filePath = filePath;
         this.creationTime = creationTime;
         // this.extractedTexts = extractedTexts;

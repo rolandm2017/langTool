@@ -69,6 +69,7 @@ public class PhotoToTextFacade {
 
     public String convertPhotoToTextUsingGoogle(File someUserPhoto) throws IOException {
         if (useRealApi) {
+            logWarningOnStartup();
             return cloudVisionApi.analyzeImageUsingGoogle(someUserPhoto);
         }
         String targetFileName = someUserPhoto.getName();

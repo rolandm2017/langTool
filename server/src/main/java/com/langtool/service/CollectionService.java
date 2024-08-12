@@ -20,24 +20,35 @@ import java.time.format.DateTimeFormatter;
 import com.langtool.object.PhotoText;
 import com.langtool.object.Photo;
 import com.langtool.repository.PhotoRepository;
-import com.langtool.repository.PhotoTextRepository;
+import com.langtool.repository.TextGroupRepository;
 import com.langtool.repository.CollectionRepository;
 import com.langtool.model.CollectionEntity;
 import com.langtool.model.PhotoEntity;
-import com.langtool.model.PhotoTextEntity;
+import com.langtool.model.TextGroupEntity;
 
 import com.langtool.dto.CollectionDto;
 import com.langtool.dto.PhotoDto;
 
 @Service
-public class PhotoCollectionService {
+public class CollectionService {
 
     @Autowired
     private PhotoRepository photoRepository;
     @Autowired
     private CollectionRepository collectionRepository;
     @Autowired
-    private PhotoTextRepository photoTextRepository;
+    private TextGroupRepository photoTextRepository;
+
+    public CollectionDto getCollectionById(Long id) {
+        Optional<CollectionEntity> maybeEntity = collectionRepository.findById(id);
+
+        if (maybeEntity.isPresent()) {
+            CollectionEntity entity = maybeEntity.get();
+            CollectionDto dto = convertCollectionEntityToDto(entity);
+            return dto;
+        }
+        return new CollectionDto();
+    }
 
     public List<PhotoText> getPhotoTexts(Long photoCollectionId) {
         // A photo set is a set of photos. Or a "photo collection".
@@ -48,20 +59,17 @@ public class PhotoCollectionService {
         if (photoOptional.isPresent()) {
             PhotoEntity photo = photoOptional.get();
             Long photoId = photo.getId();
-            List<PhotoTextEntity> photoTexts = photoTextRepository.findAllByPhotoId(photoId);
+            List<TextGroupEntity> photoTexts = photoTextRepository.findAllByPhotoId(photoId);
             List<PhotoText> texts = convertEntityToObj(photoTexts, "temp-bandaid-thing");
             return texts;
-            // return photo.getExtractedTexts().stream()
-            //     .map(text -> new PhotoText(photo.getId(), new String[]{text}))
-            //     .collect(Collectors.toList());
         }
 
         return new ArrayList<>(); // Return empty list if photo not found
     }
 
-    private List<PhotoText> convertEntityToObj(List<PhotoTextEntity> batch, String fileName) {
+    private List<PhotoText> convertEntityToObj(List<TextGroupEntity> batch, String fileName) {
         List<PhotoText> created = new ArrayList<>();
-        for (PhotoTextEntity toConvert: batch) {
+        for (TextGroupEntity toConvert: batch) {
 
             PhotoText converted = new PhotoText(toConvert.getId(), fileName, toConvert.getText().split(" "));
             created.add(converted);
@@ -71,6 +79,7 @@ public class PhotoCollectionService {
 
     public List<CollectionDto> getCollections() {
         List<CollectionEntity> allCollections = collectionRepository.findAll();
+        System.out.println("Number of collections: " + allCollections.size());
         List<CollectionDto> forTransfer = convertCollectionEntitiesToDtos(allCollections);
         return forTransfer;
        
@@ -78,16 +87,25 @@ public class PhotoCollectionService {
 
     private List<CollectionDto> convertCollectionEntitiesToDtos(List<CollectionEntity> fromDb) {
         List<CollectionDto> dtos = new ArrayList<>();
+        int i = 0;
+
         for (CollectionEntity toConvert : fromDb) {
-            CollectionDto dto = new CollectionDto(
-                String.valueOf(toConvert.getId()),
-                toConvert.getLabel(),
-                toConvert.getCreationDate(),
-                convertPhotoIdsToPhotoDtos(toConvert.getPhotoIds())
-            );
+            CollectionDto dto = convertCollectionEntityToDto(toConvert);
             dtos.add(dto);
+            
+            System.out.println("Processing item at index: " + i);
+            i++; 
         }
         return dtos;
+    }
+
+    private CollectionDto convertCollectionEntityToDto(CollectionEntity entity) {
+        return new CollectionDto(
+            String.valueOf(entity.getId()),
+            entity.getLabel(),
+            entity.getCreationDate(),
+            convertPhotoIdsToPhotoDtos(entity.getPhotoIds())
+        );
     }
 
     private List<PhotoDto> convertPhotoIdsToPhotoDtos(List<Long> photoIds) {
@@ -104,7 +122,7 @@ public class PhotoCollectionService {
     }
 
     private PhotoDto convertPhotoEntityToPhotoDto(PhotoEntity toConvert) {
-        Optional<PhotoTextEntity> photoText = photoTextRepository.findById(toConvert.getId());
+        Optional<TextGroupEntity> photoText = photoTextRepository.findById(toConvert.getId());
         if (photoText.isPresent()) {
             String[] splitText = photoText.get().getText().split(" ");
             List<String> wordsToEmbed = Arrays.asList(splitText);
