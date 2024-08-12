@@ -1,7 +1,7 @@
 import { Photo } from "./Photo.int"
 
 export interface Collection {
-    id: string
+    id: number
     label: string
     photos: Photo[]
 }

@@ -3,17 +3,17 @@ import { ChevronDown, ChevronUp, Edit2 } from "lucide-react"
 
 import { Collection } from "@/interface/Collection.int"
 import { Photo } from "@/interface/Photo.int"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
 
 interface PhotoCollectionProps {
     collection: Collection
-    onRename: (id: string, newLabel: string) => void
+    onRename: (id: number, newLabel: string) => void
 }
 
 interface PhotoCollectionsProps {
     collections: Collection[]
-    onRenameCollection: (id: string, newLabel: string) => void
+    onRenameCollection: (idForRenaming: number, newLabel: string) => void
 }
 
 const PhotoCollection: React.FC<PhotoCollectionProps> = ({
@@ -74,7 +74,7 @@ const PhotoCollection: React.FC<PhotoCollectionProps> = ({
             {isExpanded && (
                 <ul className="list-disc pl-6">
                     {collection.photos.map((photo) => (
-                        <li key={photo.id}>{photo.url}</li>
+                        <li key={photo.id}>{photo.fileName}</li>
                     ))}
                 </ul>
             )}
@@ -82,7 +82,7 @@ const PhotoCollection: React.FC<PhotoCollectionProps> = ({
     )
 }
 
-const PhotoCollections: React.FC<PhotoCollectionsProps> = ({
+const CollectionsViewer: React.FC<PhotoCollectionsProps> = ({
     collections,
     onRenameCollection,
 }) => {
@@ -100,4 +100,4 @@ const PhotoCollections: React.FC<PhotoCollectionsProps> = ({
     )
 }
 
-export default PhotoCollections
+export default CollectionsViewer
