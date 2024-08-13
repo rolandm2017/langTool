@@ -1,6 +1,8 @@
-import React, { useState, useCallback, CSSProperties } from "react"
+import React, { useState, useCallback, CSSProperties, useEffect } from "react"
 import { useDropzone, FileRejection } from "react-dropzone"
 import usePhotoUpload from "../api/useUploadPhotos.api"
+import UploadProgress from "@/components/UploadProgress"
+import useGetNextCollectionId from "@/api/useGetNextCollectionId.api"
 
 interface PhotoUploaderProps {
     maxFiles?: number
@@ -8,6 +10,22 @@ interface PhotoUploaderProps {
 
 const PhotoUploaderPage: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
     const [files, setFiles] = useState<File[]>([])
+
+    const {
+        nextCollectionId,
+        loading: collectionIdIsLoading,
+        error: collectionIdError,
+    } = useGetNextCollectionId()
+
+    let reportedCollectionId = nextCollectionId ?? -1 // appeasing typescript
+
+    useEffect(() => {
+        // appeasing typescript
+        const collectionIdIsLoaded = !collectionIdIsLoading
+        if (collectionIdIsLoaded && nextCollectionId !== null) {
+            reportedCollectionId = nextCollectionId
+        }
+    }, [collectionIdIsLoading, nextCollectionId])
 
     const { uploadPhotos, progress, isUploading, error } = usePhotoUpload()
 
@@ -31,13 +49,29 @@ const PhotoUploaderPage: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
         multiple: true,
     })
 
+    const idHasLoaded = (value: any): value is number =>
+        typeof value === "number"
+
     const startUploadFiles = () => {
         // const startUploadFiles = async (filesToUpload: File[]) => {
         // const formData = new FormData()
         // filesToUpload.forEach((file) => {
         // formData.append("photos", file)
         // })
-        uploadPhotos(files)
+        if (idHasLoaded(nextCollectionId)) {
+            uploadPhotos(files, reportedCollectionId)
+        }
+        // todo: show error if not has loaded
+    }
+
+    useEffect(() => {
+        if (progress === 100) {
+            clearFiles()
+        }
+    }, [progress])
+
+    function clearFiles() {
+        setFiles([])
     }
 
     return (
@@ -65,15 +99,36 @@ const PhotoUploaderPage: React.FC<PhotoUploaderProps> = ({ maxFiles = 20 }) => {
                             ))}
                         </ul>
                     </div>
-                    <div>
-                        <button
-                            className="mt-2 bg-gray-200 shadow-md"
-                            onClick={() => {
-                                startUploadFiles()
-                            }}
-                        >
-                            Start Upload
-                        </button>
+                    {/* todo: a label input box, optional */}
+
+                    <div className="flex justify-center mb-4">
+                        <div className="mr-2">
+                            {!collectionIdIsLoading &&
+                                nextCollectionId !== null && (
+                                    <button
+                                        className="mt-2 bg-gray-200 shadow-md"
+                                        onClick={() => {
+                                            startUploadFiles()
+                                        }}
+                                    >
+                                        Start Upload
+                                        {/* TODO: mark files uploaded after they're uploaded, give a "Clear" box */}
+                                    </button>
+                                )}
+                        </div>
+                        <div className="ml-2 mr-6">
+                            {/* <button
+                                className="mt-2 bg-gray-200 shadow-md"
+                                onClick={clearFiles}
+                            >
+                                Clear
+                            </button> */}
+                        </div>
+                    </div>
+                    <div className="flex justify-center mx-12 border-4 border-red-300">
+                        <div className="w-40 h-12 border-4 border-sky-300 flex items-center">
+                            <UploadProgress progress={progress} />
+                        </div>
                     </div>
                 </div>
             )}

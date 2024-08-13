@@ -1,12 +1,14 @@
 const apiUrl = import.meta.env.VITE_API_URL
 
-const photoUploadRoute = "/api/photos/upload"
-const getCollectionsRoute = "/api/photocollections"
+const photoUploadUrl = apiUrl + "/api/photos/upload"
+const getCollectionsUrl = apiUrl + "/api/photocollections"
+const getNextCollectionIdUrl = apiUrl + "/api/photocollections/next-id"
 
 const backendConfig = {
     apiUrl,
-    photoUploadUrl: apiUrl + photoUploadRoute,
-    getCollectionsUrl: apiUrl + getCollectionsRoute,
+    photoUploadUrl,
+    getCollectionsUrl,
+    getNextCollectionIdUrl,
 }
 
 export { backendConfig }

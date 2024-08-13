@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 public class TextGroupEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long textGroupId;
 
     @Column(name = "photo_id", nullable = false)
     private Long photoId;
@@ -26,7 +26,7 @@ public class TextGroupEntity {
 
     // Getters and setters
     public Long getId() {
-        return id;
+        return textGroupId;
     }
 
     public Long getPhotoId() {

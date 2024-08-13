@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios"
 
 import { PhotoTextDto } from "@/interface/PhotoTextDto.int"
 import { backendConfig } from "@/config/backendConfig"
-import { Collection } from "@/interface/Collection.int"
+import { Collection } from "@/interface/interfaces.int"
 
 // Define the return type of our hook
 interface UseFetchPhotoTextsResult {
@@ -12,9 +12,7 @@ interface UseFetchPhotoTextsResult {
     error: string | null
 }
 
-const useGetCollections = (
-    photoCollectionId: number
-): UseFetchPhotoTextsResult => {
+const useGetCollections = (): UseFetchPhotoTextsResult => {
     const [collections, setCollections] = useState<Collection[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
@@ -42,7 +40,7 @@ const useGetCollections = (
         }
 
         fetchPhotoTexts()
-    }, [photoCollectionId])
+    }, [])
 
     return { collections, loading, error }
 }

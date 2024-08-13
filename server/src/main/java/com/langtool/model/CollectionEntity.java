@@ -8,13 +8,13 @@ import java.util.List;
 @Table(name = "collections")
 public class CollectionEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    // @GeneratedValue(strategy = GenerationType.)
+    private Long collectionId;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String label;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime creationDate;
 
     @ElementCollection
@@ -33,7 +33,11 @@ public class CollectionEntity {
 
     // Getters and setters
     public Long getId() {
-        return id;
+        return collectionId;
+    }
+
+    public void setId(Long collectionId) {
+        this.collectionId = collectionId;
     }
 
     public String getLabel() {
@@ -52,6 +56,7 @@ public class CollectionEntity {
         this.creationDate = creationDate;
     }
 
+
     public List<Long> getPhotoIds() {
         return photoIds;
     }
@@ -59,4 +64,15 @@ public class CollectionEntity {
     public void setPhotoIds(List<Long> photoIds) {
         this.photoIds = photoIds;
     }
+
+    @Override
+    public String toString() {
+        return "CollectionEntity{" +
+                "collectionId=" + collectionId +
+                ", label='" + label + '\'' +
+                ", creationDate=" + creationDate +
+                ", photoIds=" + photoIds +
+                '}';
+    }
+
 }

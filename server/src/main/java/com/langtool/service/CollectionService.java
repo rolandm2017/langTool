@@ -2,23 +2,13 @@ package com.langtool.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.langtool.object.PhotoText;
-import com.langtool.object.Photo;
 import com.langtool.repository.PhotoRepository;
 import com.langtool.repository.TextGroupRepository;
 import com.langtool.repository.CollectionRepository;
@@ -37,7 +27,7 @@ public class CollectionService {
     @Autowired
     private CollectionRepository collectionRepository;
     @Autowired
-    private TextGroupRepository photoTextRepository;
+    private TextGroupRepository textGroupRepository;
 
     public CollectionDto getCollectionById(Long id) {
         Optional<CollectionEntity> maybeEntity = collectionRepository.findById(id);
@@ -50,6 +40,24 @@ public class CollectionService {
         return new CollectionDto();
     }
 
+    public Long getHighestCollectionId() {
+        Long highest = collectionRepository.findHighestId();
+        System.out.println("Highest collection ID: " + String.valueOf(highest));
+        boolean absolutelyNoRows = highest == null;
+        if (absolutelyNoRows) {
+            return null;
+        }
+        System.out.println("45rm");
+        System.out.println(highest);
+        return highest;
+    }
+
+   
+
+    // private void writeNewEmptyRow(Long forId, int totalExpectedFilesNum) {
+    //     collectionRepository.writeContainerRow(forId, Long.valueOf(totalExpectedFilesNum));
+    // }
+
     public List<PhotoText> getPhotoTexts(Long photoCollectionId) {
         // A photo set is a set of photos. Or a "photo collection".
         // Each entry has associated words.
@@ -59,7 +67,7 @@ public class CollectionService {
         if (photoOptional.isPresent()) {
             PhotoEntity photo = photoOptional.get();
             Long photoId = photo.getId();
-            List<TextGroupEntity> photoTexts = photoTextRepository.findAllByPhotoId(photoId);
+            List<TextGroupEntity> photoTexts = textGroupRepository.findAllByPhotoId(photoId);
             List<PhotoText> texts = convertEntityToObj(photoTexts, "temp-bandaid-thing");
             return texts;
         }
@@ -122,7 +130,7 @@ public class CollectionService {
     }
 
     private PhotoDto convertPhotoEntityToPhotoDto(PhotoEntity toConvert) {
-        Optional<TextGroupEntity> photoText = photoTextRepository.findById(toConvert.getId());
+        Optional<TextGroupEntity> photoText = textGroupRepository.findById(toConvert.getId());
         if (photoText.isPresent()) {
             String[] splitText = photoText.get().getText().split(" ");
             List<String> wordsToEmbed = Arrays.asList(splitText);
@@ -132,9 +140,26 @@ public class CollectionService {
                 wordsToEmbed
             );
         }
+        out("something went wrong with " + toConvert.getId().toString());
         List<String> failure = new ArrayList<>();
         Long failureValue = null;
         return new PhotoDto(failureValue, "Error", failure);
         
     }
+
+    private void out(String t) {
+        System.out.println(t);
+    }
+
+    // public Long useIdToExpectFiles(int totalExpectedFiles) {
+    //     /*
+    //      * Marked YAGNI
+    //      */
+    //     // write t rows into the collections.
+    //     // will continue elsewhere like this: "if (remainingContainerRowsForId(someId)) { fillContainerRow(fileName)}"
+    //     Long highest = getHighestCollectionId();
+    //     Long nextCollectionId = highest + 1;
+    //     writeNewEmptyRow(nextCollectionId, totalExpectedFiles);
+    //     return highest;
+    // }
 }

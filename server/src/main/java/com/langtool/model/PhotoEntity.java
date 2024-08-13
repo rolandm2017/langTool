@@ -10,7 +10,7 @@ import java.util.List;
 public class PhotoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long photoId;
 
     @Column(nullable = false)
     private String filePath;
@@ -36,7 +36,7 @@ public class PhotoEntity {
 
     // Getters and setters
     public Long getId() {
-        return id;
+        return photoId;
     }
 
     public String getFilePath() {

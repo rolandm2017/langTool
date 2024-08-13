@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.langtool.dto.PhotoDto;
+import com.langtool.service.CollectionService;
 import com.langtool.service.PhotoUploadService;
+import com.langtool.service.SmallFileService;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -20,6 +22,10 @@ public class PhotoUploadController {
     
     @Autowired 
     private PhotoUploadService photoUploadService;
+    @Autowired
+    private SmallFileService smallFileService;
+    @Autowired
+    private CollectionService collectionService;
 
     @GetMapping("/all")
     public ResponseEntity<List<PhotoDto>> getAllPhotos() {
@@ -52,7 +58,7 @@ public class PhotoUploadController {
         }
 
         try { 
-            photoUploadService.savePhotosWithSmallFileSizes(files); 
+            smallFileService.savePhotosWithSmallFileSizes(files); 
             return ResponseEntity.ok("Files uploaded successfully");
         } catch (Exception e) { 
             return ResponseEntity.internalServerError().body("Error uploading files: " + e.getMessage()); 
@@ -64,14 +70,22 @@ public class PhotoUploadController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("fileName") String fileName,
             @RequestParam("chunkNumber") int chunkNumber,
-            @RequestParam("totalChunks") int totalChunks) {
+            @RequestParam("totalChunks") int totalChunks,
+            @RequestParam("nextCollectionId") String nextCollectionId) {
         
+        if (nextCollectionId.equals("null")) {
+            return ResponseEntity.badRequest().body("Collection ID was null.");
+        }
+
+        Long intendedCollectionId = Long.parseLong(nextCollectionId);
+
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("Chunk is empty.");
         }
 
+
         try {
-            photoUploadService.savePhotoChunk(file, fileName, chunkNumber, totalChunks);
+            photoUploadService.savePhotoChunk(file, fileName, chunkNumber, totalChunks, intendedCollectionId);
             
             if (chunkNumber == totalChunks - 1) {
                 // All chunks received

@@ -16,6 +16,7 @@ import WordList from "@/components/collectionsPreview/WordList"
 import { Collection } from "@/interface/Collection.int"
 import { dummyPhotoCollections } from "@/assets/dummyCollections"
 import useGetCollections from "@/api/useGetCollections.api"
+import useGetNextCollectionId from "@/api/useGetNextCollectionId.api"
 
 // TODO: move this comment into the WordList component
 // User can mark some words as 'misread,' 'non-existent,' 'bugs,' etc or 'not wanted' on this page
@@ -30,7 +31,20 @@ const PhotoCollectionPreviewPage: React.FC = () => {
         dummyPhotoCollections
     )
 
-    const {} = useGetCollections() // todo
+    const {
+        collections: loadedCollections,
+        loading,
+        error,
+    } = useGetCollections() // todo
+
+    useEffect(() => {
+        if (loading) {
+            return
+        }
+        if (loadedCollections) {
+            setCollections(loadedCollections)
+        }
+    }, [loading])
 
     function renameCollection(idForRenaming: string, newLabel: string) {
         const current = JSON.parse(JSON.stringify(collections)) as Collection[]

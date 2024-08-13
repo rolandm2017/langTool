@@ -1,3 +1,9 @@
 .vscode
 ankiDeckParser
 misc
+
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.HEIC

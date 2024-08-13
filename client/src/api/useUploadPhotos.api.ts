@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import axios, { AxiosProgressEvent } from "axios"
 import { backendConfig } from "../config/backendConfig"
+import useGetNextCollectionId from "./useGetNextCollectionId.api"
 
 interface UploadResponse {
     success: boolean
@@ -14,7 +15,10 @@ interface UploadProgress {
 }
 
 interface UsePhotoUploadResult {
-    uploadPhotos: (photos: File[]) => Promise<UploadResponse>
+    uploadPhotos: (
+        photos: File[],
+        collectionId: number
+    ) => Promise<UploadResponse>
     progress: number
     isUploading: boolean
     error: string | null
@@ -27,17 +31,25 @@ const usePhotoUpload = (): UsePhotoUploadResult => {
     const [isUploading, setIsUploading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
 
+    // todo: what to do if it still hasn't loaded?
+    // todo: what to do if it tries to load and fails to get the number?
+    // i could ship a bunch of valid IDs legit hardcoded or loaded from a .env file on the server
+    // if it's null, i can make the service get the ID when the files arrive, using
+    // the names of the files linked together into a long string to "hash" their identity.
+
     const uploadChunk = async (
         chunk: Blob,
         fileName: string,
         chunkNumber: number,
-        totalChunks: number
+        totalChunks: number,
+        collectionId: number
     ): Promise<void> => {
         const formData = new FormData()
         formData.append("file", chunk, fileName)
         formData.append("fileName", fileName)
         formData.append("chunkNumber", chunkNumber.toString())
         formData.append("totalChunks", totalChunks.toString())
+        formData.append("nextCollectionId", collectionId.toString())
 
         await axios.post(`${backendConfig.photoUploadUrl}/chunk`, formData, {
             headers: {
@@ -47,7 +59,10 @@ const usePhotoUpload = (): UsePhotoUploadResult => {
     }
 
     const uploadPhotos = useCallback(
-        async (photos: File[]): Promise<UploadResponse> => {
+        async (
+            photos: File[],
+            collectionId: number
+        ): Promise<UploadResponse> => {
             setIsUploading(true)
             setProgress(0)
             setError(null)
@@ -75,7 +90,8 @@ const usePhotoUpload = (): UsePhotoUploadResult => {
                             chunk,
                             photo.name,
                             chunkNumber,
-                            totalChunks
+                            totalChunks,
+                            collectionId
                         )
 
                         totalUploaded += chunk.size

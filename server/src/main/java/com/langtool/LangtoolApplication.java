@@ -28,98 +28,126 @@ import java.util.stream.Stream;
 @SpringBootApplication
 public class LangtoolApplication {
 
+    // ANSI escape code for yellow text
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    // ANSI escape code to reset text color
+    public static final String ANSI_RESET = "\u001B[0m";
+
+
 	public static void main(String[] args) {
-		SpringApplication.run(LangtoolApplication.class, args);
-		// boolean cleanOutTablesAndFiles = true; // Set this to false if you don't want to clean out the database on startup
+		boolean resetAllTables = true;
+        
+        if (resetAllTables) {
+            ConfigurableApplicationContext context = SpringApplication.run(LangtoolApplication.class, args);
+            // Uncomment the following line to reset tables on application start
+            context.getBean(TableResetter.class).resetTables();
+            // Uncomment the following line to reset uploads on application start
+            context.getBean(UploadFolderResetter.class).resetUploadFolders();
+        } else {
+            SpringApplication.run(LangtoolApplication.class, args);
+        }
+    }
 
-        // ConfigurableApplicationContext context = SpringApplication.run(LangtoolApplication.class, args);
+    /*
+     * Cleanup utils
+     */
 
-        // if (cleanOutTablesAndFiles) {
-        //     // Retrieve the DataCleaner bean and run it
-        //     DataCleaner dataCleaner = context.getBean(DataCleaner.class);
-        //     dataCleaner.run();
-        // }
+    @Component
+    public static class TableResetter {
+
+        @Autowired
+        private EntityManager entityManager;
+
+        @Transactional
+        public void resetTables() {
+            System.out.println("Resetting tables...");
+
+            // Disable all triggers
+            entityManager.createNativeQuery("SET session_replication_role = 'replica';").executeUpdate();
+
+            List<String> tablesToReset = Arrays.asList(
+                "collections",
+                "photos",
+                "text_groups",
+                "collection_photos"
+                // Add more table names as needed
+            );
+
+            for (String tableName : tablesToReset) {
+                System.out.println("Truncating table: " + tableName);
+                entityManager.createNativeQuery("TRUNCATE TABLE " + tableName + " CASCADE").executeUpdate();
+                // write your code here GPT!
+            }
+
+            // Reset sequences
+            resetSequences();
+
+            // Re-enable all triggers
+            entityManager.createNativeQuery("SET session_replication_role = 'origin';").executeUpdate();
+
+            String message = "All specified tables have been reset.";
+            System.out.println(ANSI_YELLOW + message + ANSI_RESET);
+        }
+
+        private void resetSequences() {
+            System.out.println("Resetting sequences...");
+            // Fetch and reset all sequences in the public schema
+            List<String> sequences = entityManager.createNativeQuery(
+                "SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'")
+                .getResultList();
+        
+            for (Object seq : sequences) {
+                String sequenceName = (String) seq;
+                System.out.println("Resetting sequence: " + sequenceName);
+                entityManager.createNativeQuery("ALTER SEQUENCE " + sequenceName + " RESTART WITH 1").executeUpdate();
+            }
+        }
+        
+    }
+
+    @Component
+    public static class UploadFolderResetter {
+
+        @Value("${file.upload-dir}")
+        private String BASE_UPLOAD_DIR;
+
+        @Value("${file.temp-dir}")
+        private String TEMP_DIR;
+
+        public void resetUploadFolders() {
+            System.out.println("Resetting upload folders...");
+
+            deleteDirectoryContents(BASE_UPLOAD_DIR);
+            deleteDirectoryContents(TEMP_DIR);
+
+            String message = "Upload folders have been reset.";
+            System.out.println(ANSI_YELLOW + message + ANSI_RESET);
+        }
+
+        private void deleteDirectoryContents(String directoryPath) {
+            Path path = Paths.get(directoryPath);
+            if (!Files.exists(path)) {
+                System.out.println("Directory does not exist: " + directoryPath);
+                return;
+            }
+
+            try (Stream<Path> walk = Files.walk(path)) {
+                walk.sorted((a, b) -> b.toString().length() - a.toString().length()) // Reverse order to delete files before directories
+                    .forEach(this::deleteFileOrDirectory);
+            } catch (IOException e) {
+                System.err.println("Error while deleting directory contents: " + e.getMessage());
+            }
+        }
+
+        private void deleteFileOrDirectory(Path path) {
+            try {
+                if (!path.equals(Paths.get(BASE_UPLOAD_DIR)) && !path.equals(Paths.get(TEMP_DIR))) {
+                    Files.deleteIfExists(path);
+                    System.out.println("Deleted: " + path);
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to delete: " + path + ". Error: " + e.getMessage());
+            }
+        }
     }
 }
-
-// @Component
-// class DataCleaner implements CommandLineRunner {
-
-//     @Autowired
-//     private EntityManager entityManager;
-
-//     @Autowired
-//     private CollectionRepository collectionRepository;
-
-//     @Autowired
-//     private PhotoRepository photoRepository;
-
-//     @Autowired
-//     private TextGroupRepository textGroupRepository;
-
-//     private List<JpaRepository<?, ?>> repositories;
-
-// 	@Value("${file.upload-dir}")
-//     private String BASE_UPLOAD_DIR;
-
-//     @Value("${file.temp-dir}")
-//     private String TEMP_DIR;
-
-//     @Override
-//     @Transactional
-//     public void run(String... args) {
-//         repositories = Arrays.asList(collectionRepository, photoRepository, textGroupRepository);
-//         deleteAllFromRepositories(repositories);
-//         deleteFilesInDirectories();
-//     }
-
-//     private void deleteAllFromRepositories(List<JpaRepository<?, ?>> repositories) {
-//         for (JpaRepository<?, ?> repository : repositories) {
-//             Class<?> entityClass = getEntityClass(repository);
-//             if (entityClass == null) {
-//                 System.out.println("Could not determine entity class for repository: " + repository.getClass().getSimpleName());
-//                 continue;
-//             }
-
-//             Table tableAnnotation = entityClass.getAnnotation(Table.class);
-//             String tableName = (tableAnnotation != null && !tableAnnotation.name().isEmpty()) 
-//                 ? tableAnnotation.name() 
-//                 : entityClass.getSimpleName();
-
-//             entityManager.createNativeQuery("DELETE FROM " + tableName).executeUpdate();
-//             System.out.println("Deleted all rows from table: " + tableName);
-//         }
-//     }
-
-//     private Class<?> getEntityClass(JpaRepository<?, ?> repository) {
-//         return repository.getClass().getInterfaces()[0].getGenericInterfaces()[0].getClass();
-//     }
-
-// 	private void deleteFilesInDirectories() {
-// 		deleteFilesInDirectory(BASE_UPLOAD_DIR);
-//         deleteFilesInDirectory(TEMP_DIR);
-//     }
-
-//     private void deleteFilesInDirectory(String directoryPath) {
-//         Path directory = Paths.get(directoryPath);
-//         if (!Files.exists(directory)) {
-//             System.out.println("Directory does not exist: " + directoryPath);
-//             return;
-//         }
-
-//         try (Stream<Path> files = Files.list(directory)) {
-//             files.forEach(file -> {
-//                 try {
-//                     Files.delete(file);
-//                     System.out.println("Deleted file: " + file);
-//                 } catch (IOException e) {
-//                     System.err.println("Failed to delete file: " + file);
-//                     e.printStackTrace();
-//                 }
-//             });
-//         } catch (IOException e) {
-//             System.err.println("Error accessing directory: " + directoryPath);
-//             e.printStackTrace();
-//         }
-//     }
-// }
