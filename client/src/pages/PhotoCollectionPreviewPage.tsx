@@ -17,6 +17,7 @@ import { Collection } from "@/interface/Collection.int"
 import { dummyPhotoCollections } from "@/assets/dummyCollections"
 import useGetCollections from "@/api/useGetCollections.api"
 import useGetNextCollectionId from "@/api/useGetNextCollectionId.api"
+import { useUpdateCollectionLabel } from "@/api/useUpdateCollectionLabel.api"
 
 // TODO: move this comment into the WordList component
 // User can mark some words as 'misread,' 'non-existent,' 'bugs,' etc or 'not wanted' on this page
@@ -26,6 +27,8 @@ const PhotoCollectionPreviewPage: React.FC = () => {
     const [navState, setNavState] = useState<PhotoCollectionPageState>(
         photoCollectionPageStates.collections
     )
+
+    const [pageError, setPageError] = useState("")
 
     const [collections, setCollections] = useState<Collection[]>(
         dummyPhotoCollections
@@ -37,6 +40,9 @@ const PhotoCollectionPreviewPage: React.FC = () => {
         error,
     } = useGetCollections() // todo
 
+    const { updateCollectionLabel, error: updateError } =
+        useUpdateCollectionLabel()
+
     useEffect(() => {
         if (loading) {
             return
@@ -47,6 +53,18 @@ const PhotoCollectionPreviewPage: React.FC = () => {
     }, [loading])
 
     function renameCollection(idForRenaming: string, newLabel: string) {
+        // tell the backend
+        updateCollectionLabel({ idForRenaming, newLabel }).then((success) => {
+            if (!success) {
+                setPageError(
+                    updateError
+                        ? updateError
+                        : "An error occurred during renaming. Try again or report the problem."
+                )
+            }
+        })
+
+        // tell the client
         const current = JSON.parse(JSON.stringify(collections)) as Collection[]
         console.log(current, idForRenaming)
         const targetIndex = current.findIndex(

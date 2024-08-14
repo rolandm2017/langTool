@@ -11,6 +11,9 @@ import java.util.Optional;
 import com.langtool.object.PhotoText;
 import com.langtool.repository.PhotoRepository;
 import com.langtool.repository.TextGroupRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import com.langtool.repository.CollectionRepository;
 import com.langtool.model.CollectionEntity;
 import com.langtool.model.PhotoEntity;
@@ -149,6 +152,23 @@ public class CollectionService {
 
     private void out(String t) {
         System.out.println(t);
+    }
+
+    public boolean updateCollectionLabel(String id, String newLabel) {
+        System.out.println("id : " + id + " " + newLabel);
+        try {
+            Long idAsLong = Long.valueOf(id);
+            CollectionEntity toUpdate = collectionRepository.findById(idAsLong)
+            .orElseThrow(() -> new EntityNotFoundException("Collection not found with id: " + id));
+            toUpdate.setLabel(newLabel);
+            collectionRepository.save(toUpdate);
+            return true;
+        } catch (Exception e) {
+            System.out.println(e);
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // public Long useIdToExpectFiles(int totalExpectedFiles) {

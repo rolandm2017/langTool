@@ -31,9 +31,14 @@ public class LangtoolApplication {
 
 
 	public static void main(String[] args) {
-		boolean resetAllTables = true;
+		boolean resetAllTables = false;
         
         if (resetAllTables) {
+            System.out.println("## ## ## ## ## ## ## ## ## ## ## ## ##");
+            System.out.println("#/ // // // // // // // // // // // /#");
+            System.out.println("#/ // // Resetting all tables // // /#");
+            System.out.println("#/ // // // // // // // // // // // /#");
+            System.out.println("## ## ## ## ## ## ## ## ## ## ## ## ##");
             ConfigurableApplicationContext context = SpringApplication.run(LangtoolApplication.class, args);
             // Uncomment the following line to reset tables on application start
             context.getBean(TableResetter.class).resetTables();
