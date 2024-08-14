@@ -147,12 +147,6 @@ public class PhotoUploadService {
         }
 
         writeNewCollectionOrUpdate(intendedCollectionId, creationTime, photoId);
-        System.out.println("                 /\\");
-        System.out.println("                /  \\");
-        System.out.println("               /    \\");
-        System.out.println("              /______\\");
-        System.out.println("             /        \\");
-        System.out.println("            /  /\\  /\\  \\");
         System.out.println("           /  /  \\/  \\  \\");
         System.out.println("          ^^^^    \\    ^^^^");
         deleteDirectory(tempDir); // Clean up temp directory

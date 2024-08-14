@@ -10,10 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.langtool.repository.CollectionRepository;
-import com.langtool.repository.PhotoRepository;
-import com.langtool.repository.TextGroupRepository;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Table;
 import java.io.File;

@@ -50,21 +50,22 @@ public interface CollectionRepository extends JpaRepository<CollectionEntity, Lo
         
         System.out.println("++++++ 48rm");
         CollectionEntity toUpdate = findById(newCollectionId).orElseThrow(() -> new EntityNotFoundException("Collection not found"));;
-        System.out.println(toUpdate);
-        System.out.println("+++=========== 51rm");
+        // System.out.println("+++=========== 51rm");
         toUpdate.setLabel(starterLabel);
-        System.out.println("+++=========== 52rm");
+        // System.out.println("+++=========== 52rm");
         // toUpdate.setCreationDate(creationTime);
-        System.out.println("+++=========== 53rm");
+        // System.out.println("+++=========== 53rm");
         List<Long> photoList = new ArrayList<>();
         photoList.add(starterPhotoId);
         System.out.println(photoList);
-        // toUpdate.setPhotoIds(photoList);
+        toUpdate.setPhotoIds(photoList); 
         System.out.println("+++=========== 54rm");
         toUpdate.setCreationDate(creationTime);
+
+        System.out.println(toUpdate);
         CollectionEntity saved = save(toUpdate);
         flush();
-        System.out.println("=======================\n=========\n=========== 65rm");
+        System.out.println("======================= 65rm\n=========\n=========== 65rm");
         // return newCollection;
         return saved;
     }
@@ -87,8 +88,6 @@ public interface CollectionRepository extends JpaRepository<CollectionEntity, Lo
         System.out.println(collection.toString());
         save(collection);
         flush();
-        System.out.println("    _    /\\                  ~       /\\");
-        System.out.println("  _|_|_  /  \\   __    _____     ____/  \\");
         System.out.println(" |_____|/____\\ |__|  |_____| O |_______/");
     }
 
