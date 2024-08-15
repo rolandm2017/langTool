@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.langtool.dto.TextGroupDto;
 import com.langtool.model.TextGroupEntity;
+import com.langtool.model.WordEntity;
 import com.langtool.repository.TextGroupRepository;
 
 
@@ -27,20 +30,41 @@ public class TextGroupService {
         return dtoList;
     }
 
-    private List<TextGroupDto> convertTextGroupEntitiesToDtos(List<TextGroupEntity> entities) {
-        Map<Long, List<TextGroupEntity>> groupedByPhotoId = entities.stream()
-            .collect(Collectors.groupingBy(TextGroupEntity::getPhotoId));
+    private List<TextGroupDto> convertTextGroupEntitiesToTextGroupDtos(List<TextGroupEntity> entities) {
+        List<TextGroupDto> out = new ArrayList<>();
+        for (TextGroupEntity group: entities) {
+            String toAdd = ""; 
+            Set<WordEntity> wordsToAppend = group.getWords();
+            for (WordEntity word: wordsToAppend) {
+                toAdd = toAdd + " " + word.getOrigin();
+            }
+            TextGroupDto dto = new TextGroupDto(group.getId(), toAdd);
+            out.add(dto);
+        }
+        return out;
+    }
 
-        return groupedByPhotoId.entrySet().stream()
-            .map(entry -> {
-                Long photoId = entry.getKey();
-                List<TextGroupEntity> group = entry.getValue();
-                String[] texts = group.stream()
-                    .map(TextGroupEntity::getText)
-                    .toArray(String[]::new);
-                String srcFileName = "photo_" + photoId + ".jpg"; // Assuming a naming convention
-                return new TextGroupDto(photoId, srcFileName, texts);
-            })
-            .collect(Collectors.toList());
+    public void addWordToTextGroup(Long groupId, String word) {
+        TextGroupEntity textGroup = textGroupRepository.findById(groupId).orElseThrow();
+        WordEntity newWord = new WordEntity();
+        newWord.setWord("example");
+        textGroup.addWord(newWord);
+        textGroupRepository.save(textGroup);  // This will also save the new word
+    }
+
+    public List<TextGroupDto> convertTextGroupEntitiesToDtos(List<TextGroupEntity> list) {
+        List<TextGroupDto> out = new ArrayList<TextGroupDto>();
+
+        for (TextGroupEntity entity: list) {
+            String toAdd = ""; 
+            Set<WordEntity> wordsToAppend = entity.getWords();
+            for (WordEntity word: wordsToAppend) {
+                toAdd = toAdd + " " + word.getOrigin();
+            }
+            TextGroupDto dto = new TextGroupDto(entity.getId(), toAdd);
+            out.add(dto);
+        }
+
+        return out;
     }
 }

@@ -1,11 +1,11 @@
 package com.langtool.object;
 
-public class PhotoText {
+public class TextGroup {
     private Long id;
     private String fileName;
     private String[] texts;
 
-    public PhotoText(Long id, String fileName, String[] texts) {
+    public TextGroup(Long id, String fileName, String[] texts) {
         this.id = id;
         this.fileName = fileName;
         this.texts = texts;

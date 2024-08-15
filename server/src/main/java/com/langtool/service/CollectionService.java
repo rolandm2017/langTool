@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
-import com.langtool.object.PhotoText;
+import com.langtool.object.TextGroup;
 import com.langtool.repository.PhotoRepository;
 import com.langtool.repository.TextGroupRepository;
 
@@ -18,9 +19,12 @@ import com.langtool.repository.CollectionRepository;
 import com.langtool.model.CollectionEntity;
 import com.langtool.model.PhotoEntity;
 import com.langtool.model.TextGroupEntity;
+import com.langtool.model.WordEntity;
 
 import com.langtool.dto.CollectionDto;
 import com.langtool.dto.PhotoDto;
+
+import java.util.HashSet;;
 
 @Service
 public class CollectionService {
@@ -61,7 +65,7 @@ public class CollectionService {
     //     collectionRepository.writeContainerRow(forId, Long.valueOf(totalExpectedFilesNum));
     // }
 
-    public List<PhotoText> getPhotoTexts(Long photoCollectionId) {
+    public List<TextGroup> getPhotoTexts(Long photoCollectionId) {
         // A photo set is a set of photos. Or a "photo collection".
         // Each entry has associated words.
         // This exchanges the ID of the collection and gets back all the words in each entry.
@@ -71,18 +75,26 @@ public class CollectionService {
             PhotoEntity photo = photoOptional.get();
             Long photoId = photo.getId();
             List<TextGroupEntity> photoTexts = textGroupRepository.findAllByPhotoId(photoId);
-            List<PhotoText> texts = convertEntityToObj(photoTexts, "temp-bandaid-thing");
+            List<TextGroup> texts = convertEntityToObj(photoTexts, "temp-bandaid-thing");
             return texts;
         }
 
         return new ArrayList<>(); // Return empty list if photo not found
     }
 
-    private List<PhotoText> convertEntityToObj(List<TextGroupEntity> batch, String fileName) {
-        List<PhotoText> created = new ArrayList<>();
+    private List<TextGroup> convertEntityToObj(List<TextGroupEntity> batch, String fileName) {
+        List<TextGroup> created = new ArrayList<>();
         for (TextGroupEntity toConvert: batch) {
 
-            PhotoText converted = new PhotoText(toConvert.getId(), fileName, toConvert.getText().split(" "));
+            Set<WordEntity> wordsToAdd = toConvert.getWords();
+            Set<String> justTheirStrings = new HashSet<>();
+            for (WordEntity w: wordsToAdd) {
+                justTheirStrings.add(w.getOrigin());
+            }
+
+            String[] stringArray = justTheirStrings.toArray(new String[0]);
+
+            TextGroup converted = new TextGroup(toConvert.getId(), fileName, stringArray);
             created.add(converted);
         }
         return created;
@@ -110,14 +122,9 @@ public class CollectionService {
         return dtos;
     }
 
-    private CollectionDto convertCollectionEntityToDto(CollectionEntity entity) {
-        return new CollectionDto(
-            String.valueOf(entity.getId()),
-            entity.getLabel(),
-            entity.getCreationDate(),
-            convertPhotoIdsToPhotoDtos(entity.getPhotoIds())
-        );
-    }
+
+
+
 
     private List<PhotoDto> convertPhotoIdsToPhotoDtos(List<Long> photoIds) {
         List<PhotoDto> photoDtos = new ArrayList<>();
@@ -132,24 +139,7 @@ public class CollectionService {
         return photoDtos;
     }
 
-    private PhotoDto convertPhotoEntityToPhotoDto(PhotoEntity toConvert) {
-        Optional<TextGroupEntity> photoText = textGroupRepository.findById(toConvert.getId());
-        if (photoText.isPresent()) {
-            String[] splitText = photoText.get().getText().split(" ");
-            List<String> wordsToEmbed = Arrays.asList(splitText);
-            return new PhotoDto(
-                toConvert.getId(),
-                toConvert.getFilePath(),
-                wordsToEmbed
-            );
-        }
-        out("something went wrong with " + toConvert.getId().toString());
-        List<String> failure = new ArrayList<>();
-        Long failureValue = null;
-        return new PhotoDto(failureValue, "Error", failure);
-        
-    }
-
+   
     private void out(String t) {
         System.out.println(t);
     }

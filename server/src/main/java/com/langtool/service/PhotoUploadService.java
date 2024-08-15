@@ -3,20 +3,21 @@ package com.langtool.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.cloud.vision.v1.Word;
 import com.langtool.client.PhotoToTextFacade;
 import com.langtool.dto.PhotoDto;
 import com.langtool.model.CollectionEntity;
 import com.langtool.model.PhotoEntity;
 import com.langtool.model.TextGroupEntity;
+import com.langtool.model.WordEntity;
 import com.langtool.repository.CollectionRepository;
 import com.langtool.repository.PhotoRepository;
 import com.langtool.repository.TextGroupRepository;
-
+import com.langtool.repository.WordRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import static java.lang.StringTemplate.STR;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,8 +30,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.Comparator;
+import java.util.HashSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +53,8 @@ public class PhotoUploadService {
     private PhotoRepository photoRepository;
     @Autowired
     private CollectionRepository collectionRepository;
+    @Autowired
+    private WordRepository wordRepository;
 
     @Value("${file.upload-dir}")
     private String BASE_UPLOAD_DIR;
@@ -68,27 +73,7 @@ public class PhotoUploadService {
         return processed;
     }
 
-    private PhotoDto convertPhotoEntityToPhotoDto(PhotoEntity toConvert) {
-        logger.info("Converting entity to dto");
-        Long id = toConvert.getId();
-        System.out.println("processing ... " + Long.toString(id));
-        Optional<TextGroupEntity> photoText = textGroupRepository.findById(id);
-        if (photoText.isPresent()) {
-            String[] splitText = photoText.get().getText().split(" ");
-            List<String> wordsToEmbed = Arrays.asList(splitText);
-            System.out.println(Integer.valueOf(splitText.length));
-            return new PhotoDto(
-                toConvert.getId(),
-                toConvert.getFilePath(),
-                wordsToEmbed
-            );
-        }
-        System.out.println(Long.toString(id) + " wasn't present");
-        List<String> failure = new ArrayList<>();
-        Long failureValue = null;
-        return new PhotoDto(failureValue, "Error", failure);
-        
-    }
+  
 
     public void savePhotoChunk(MultipartFile file, String fileName, int chunkNumber, int totalChunks, Long intendedCollectionId) throws IOException {
         int someUserId = 500; // get from user auth later
@@ -123,22 +108,20 @@ public class PhotoUploadService {
 
         LocalDateTime creationTime = LocalDateTime.now();
        
-        Long photoId = null;
+        PhotoEntity photo = null;
         System.out.println("128rm");
         try (FileOutputStream fos = new FileOutputStream(outputFile)) {
             File[] chunks = tempDir.listFiles();
             if (chunks != null) {
                 File reassembledPhoto = reassemblePhotoChunks(fileName, chunks, fos);
                 System.out.println("reassembled! writing ");
-                PhotoEntity savedPhoto = writeNewPhotoToDb(fileName, creationTime);
-                photoId = savedPhoto.getId();
-                System.out.println(savedPhoto.getId() + " is the photo ID to save");
+                photo = writeNewPhotoToDb(fileName, creationTime, intendedCollectionId);
                 // process photo text
                 logger.info("Passing photo to cloud vision");
                 String[] gatheredTextArr = passPhotoToGoogleCloudVision(reassembledPhoto);
-                
-                writeNewTextGroupToDb(savedPhoto, gatheredTextArr);
-                
+                List<WordEntity> newWordsToAdd = convertCloudVisionContentToWordEntities(gatheredTextArr);
+                // TODO: move away from a native query -> make the ORM do it for you using getter,setter
+                writeNewTextGroupToDb(intendedCollectionId, photo, newWordsToAdd);
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -146,16 +129,29 @@ public class PhotoUploadService {
             throw e;
         }
 
-        writeNewCollectionOrUpdate(intendedCollectionId, creationTime, photoId);
-        System.out.println("           /  /  \\/  \\  \\");
-        System.out.println("          ^^^^    \\    ^^^^");
+        writeNewCollectionOrUpdate(intendedCollectionId, creationTime, photo);
+        System.out.println("/  /  \\\\/  \\\\  \\\\          ^^^^    \\    ^^^^");
         deleteDirectory(tempDir); // Clean up temp directory
     }
 
-    // private void fillContainerRow(Long collectionId, LocalDateTime creationTime, List<Long> photoIds) {
-    //     // todo
-    //     collectionRepository.
-    // }
+    private List<WordEntity> convertCloudVisionContentToWordEntities(String[] gatheredText) {
+        List<WordEntity> out = new ArrayList<WordEntity>();
+        for (String text: gatheredText) {
+            Optional<WordEntity> existingRow = wordRepository.findByOrigin(text);
+            if (existingRow.isPresent()) {
+                // increment
+                WordEntity row = existingRow.get();
+                row.incrementMentions();
+                wordRepository.save(row);
+                out.add(row);
+                continue;
+            }
+            WordEntity topic = new WordEntity();
+            topic.setOrigin(text);
+            out.add(topic);
+        }
+        return out;
+    }
 
 
     // Helper method
@@ -199,44 +195,76 @@ public class PhotoUploadService {
         return reassembledFile;
     }
 
-    private PhotoEntity writeNewPhotoToDb(String photoFileName, LocalDateTime creationTime) {
+    private PhotoEntity writeNewPhotoToDb(String photoFileName, LocalDateTime creationTime, Long intendedCollectionId) {
         System.out.println("writing photo to db: " + photoFileName);
+        Optional<CollectionEntity> someCollectionThatMightExist = collectionRepository.findById(intendedCollectionId);
+        if (someCollectionThatMightExist.isPresent()) {
+            // write the photo using that collection
+            PhotoEntity newPhoto = new PhotoEntity(photoFileName, creationTime);
+            newPhoto.setCollection(someCollectionThatMightExist.get());
+            System.out.println("Saving text from " + photoFileName);
+            // fixme: has to have a collection set
+            PhotoEntity savedPhoto = photoRepository.save(newPhoto); // store the photo's path and get its id for the next write.
+            return savedPhoto;
+        }
+        // if the collection isn't there yet, create it because
+        // you can't create a photo that has no collection
+        CollectionEntity fromScratch = new CollectionEntity();
+        String defaultCollectionlabel = String.valueOf(creationTime);
+        fromScratch.setId(intendedCollectionId);
+        fromScratch.setLabel(defaultCollectionlabel);
+        collectionRepository.save(fromScratch);
+
         PhotoEntity newPhoto = new PhotoEntity(photoFileName, creationTime);
+        newPhoto.setCollection(fromScratch);
         System.out.println("Saving text from " + photoFileName);
+        // fixme: has to have a collection set
         PhotoEntity savedPhoto = photoRepository.save(newPhoto); // store the photo's path and get its id for the next write.
+        System.out.println("does this print? 202rm");
         return savedPhoto;
     }
 
-    private void writeNewTextGroupToDb(PhotoEntity newPhotoEntry, String[] textArr) {
-        logger.info("writing text group " + String.valueOf(textArr.length));
-        Long newPhotoInsertId = newPhotoEntry.getId();
-        textGroupRepository.insertTextGroup(newPhotoInsertId, textArr);
+    private void writeNewTextGroupToDb(Long associatedCollectionId, PhotoEntity newPhotoEntry, List<WordEntity> wordsToAdd) {
+        logger.info("writing text group " + String.valueOf(wordsToAdd.size()));
+        TextGroupEntity toSave = new TextGroupEntity();
+        Set<WordEntity> uniqueWordsOnly = new HashSet<WordEntity>();
+        Set<Long> seenIds = new HashSet<Long>();
+        for (WordEntity word: wordsToAdd) {
+            if (seenIds.contains(word.getId())) {
+                continue;
+            }
+            seenIds.add(word.getId());
+            uniqueWordsOnly.add(word);
+        }
+        toSave.setWords(uniqueWordsOnly);
+        toSave.setPhoto(newPhotoEntry);
+        textGroupRepository.save(toSave);
+        // Long newPhotoInsertId = newPhotoEntry.getId();
+        // textGroupRepository.insertTextGroup(associatedCollectionId, newPhotoInsertId, textArr);
     }
 
-    private void writeNewCollectionOrUpdate(Long targetCollectionId, LocalDateTime creationTime, Long photoId) {
+    private void writeNewCollectionOrUpdate(Long targetCollectionId, LocalDateTime creationTime, PhotoEntity photo) {
         /* Could be the first photo to be uploaded or one of dozens.
          * Hence the Collection might be being created or being updated.<
          * find if this target collection id already exists
          * */
-
-        
-        boolean collectionExists = collectionRepository.existsById(targetCollectionId);
-        List<CollectionEntity> all = collectionRepository.findAll();
-        System.out.println("All Collection IDs: " + all.stream().map(CollectionEntity::getId).collect(Collectors.toList()));
-        System.out.println("Collection exists? " + " " + String.valueOf(targetCollectionId) + " " + String.valueOf(collectionExists));
-        // if it does, put the photo into there
-        if (collectionExists) {
-            System.out.println("add photo to collection: " + targetCollectionId.toString()+ " " + photoId.toString());
-            collectionRepository.writeAdditionalPhotoIdToCollection(targetCollectionId, photoId);
-            System.out.println("here be dragons");
+        Optional<CollectionEntity> collectionEntityToUpdate = collectionRepository.findById(targetCollectionId);
+        if (collectionEntityToUpdate.isPresent()) {
+            System.out.println("add photo to collection: " + targetCollectionId.toString()+ " " + photo.toString());
+            CollectionEntity collection = collectionEntityToUpdate.get();
+            collection.addPhoto(photo);
+            collectionRepository.save(collection);
+            photo.setCollection(collection);
+            photoRepository.save(photo);
             return;
         }
-        System.out.println("Start a collection: " + targetCollectionId.toString()+ " " + photoId.toString());
-        // if it doesn't exist, create a new one with just this one photo id
-        System.out.println("prints 234rm");
-        collectionRepository.insertNewCollectionWithOnePhoto(targetCollectionId, creationTime, photoId);
-        System.out.println("doesn't print 235rm");
-
+        // // if it doesn't exist, create a new one with just this one photo id
+        CollectionEntity fromScratch = new CollectionEntity();
+        fromScratch.addPhoto(photo);
+        fromScratch.setCreationDate(creationTime);
+        collectionRepository.save(fromScratch);
+        photo.setCollection(fromScratch);
+        photoRepository.save(photo);
     }
 
    

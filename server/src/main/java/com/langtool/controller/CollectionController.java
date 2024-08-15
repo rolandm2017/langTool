@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import java.util.*;
 
-import com.langtool.object.PhotoText;
+import com.langtool.object.TextGroup;
 import com.langtool.service.CollectionService;
 
 import com.langtool.dto.CollectionDto;
@@ -93,7 +93,7 @@ class UpdateCollectionLabelRequest {
 
     @JsonProperty("newLabel")
     private String newLabel;
-    
+
     // Getters and setters
     public String getId() {
         return idForRenaming;

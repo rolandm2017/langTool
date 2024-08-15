@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.langtool.model.PhotoEntity;
 import com.langtool.model.TextGroupEntity;
 
 import java.util.List;
@@ -31,9 +32,11 @@ public interface TextGroupRepository extends JpaRepository<TextGroupEntity, Long
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO text_groups (photo_id, text) SELECT :photoId, unnest(:texts)", nativeQuery = true)
-    void insertTextGroup(Long photoId, String[] texts);
+    @Query(value = "INSERT INTO text_groups (collection_id, photo_id, text) SELECT :collectionId, :photoId, unnest(:texts)", nativeQuery = true)
+    void insertTextGroup(Long collectionId, Long photoId, String[] texts);
 
     @Query(value = "SELECT * FROM text_groups WHERE photo_id = :photoId", nativeQuery = true)
     List<TextGroupEntity> findAllByPhotoId(Long photoId);
+
+    List<TextGroupEntity> findByCollectionId(Long collectionId);    
 }

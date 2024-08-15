@@ -2,7 +2,9 @@ package com.langtool.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 @Entity
 @Table(name = "collections")
@@ -17,18 +19,19 @@ public class CollectionEntity {
     @Column(nullable = true)
     private LocalDateTime creationDate;
 
-    @ElementCollection
-    @CollectionTable(name = "collection_photos", joinColumns = @JoinColumn(name = "collection_id"))
-    @Column(name = "photo_id")
-    private List<Long> photoIds;
+    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PhotoEntity> photos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TextGroupEntity> textGroups = new ArrayList<>();
 
     // Constructors
     public CollectionEntity() {}
 
-    public CollectionEntity(String label, LocalDateTime creationDate, List<Long> photoIds) {
+    public CollectionEntity(String label, LocalDateTime creationDate) {
         this.label = label;
         this.creationDate = creationDate;
-        this.photoIds = photoIds;
+        // this.photoIds = photoIds;
     }
 
     // Getters and setters
@@ -57,12 +60,30 @@ public class CollectionEntity {
     }
 
 
-    public List<Long> getPhotoIds() {
-        return photoIds;
+    public List<PhotoEntity> getPhotos() {
+        return Collections.unmodifiableList(photos);
+    }
+    
+    protected void setPhotos(List<PhotoEntity> photos) {
+        this.photos = photos;
+    }
+    
+    public void addPhoto(PhotoEntity photo) {
+        photos.add(photo);
+        photo.setCollection(this);
     }
 
-    public void setPhotoIds(List<Long> photoIds) {
-        this.photoIds = photoIds;
+    public void addPhotos(List<PhotoEntity> list) {
+        list.forEach(this::addPhoto);
+    }
+    
+    public void removePhoto(PhotoEntity photo) {
+        photos.remove(photo);
+        photo.setCollection(null);
+    }
+
+    public List<TextGroupEntity> getTextGroups() {
+        return textGroups;
     }
 
     @Override
@@ -71,7 +92,7 @@ public class CollectionEntity {
                 "collectionId=" + collectionId +
                 ", label='" + label + '\'' +
                 ", creationDate=" + creationDate +
-                ", photoIds=" + photoIds +
+                // ", photoIds=" + photoIds +
                 '}';
     }
 

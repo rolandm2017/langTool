@@ -13,23 +13,23 @@ import java.util.List;
 
 import com.langtool.dto.WordDto;
 import com.langtool.dto.BatchWordDto;
-import com.langtool.service.WordService;
+import com.langtool.service.WordsService;
 import com.langtool.dto.CsvOutput;
 
 
 
 @RestController
-@RequestMapping("/words")
+@RequestMapping("/api/words")
 public class WordController {
 
     @Autowired
-    private WordService wordService;
+    private WordsService wordsService;
 
     private List<WordDto> words = new ArrayList<>();
 
-    @GetMapping
+    @GetMapping("/all")
     public List<WordDto> getAllWords() {
-        return this.wordService.getAllWords();
+        return wordsService.getAllWords();
     }
 
     @PostMapping
@@ -46,7 +46,7 @@ public class WordController {
         }
         word.setDateSubmitted(LocalDateTime.now());
         // words.add(word);
-        this.wordService.saveWord(word);
+        this.wordsService.saveWord(word);
         return new ResponseEntity<>(word, HttpStatus.CREATED);
     }
 
@@ -54,7 +54,7 @@ public class WordController {
     public ResponseEntity<BatchWordDto> addWords(@RequestBody BatchWordDto words) {
         System.out.println("Number of words submitted: " + words.getWords().length);
 
-        this.wordService.saveWords(words);
+        this.wordsService.saveWords(words);
         return new ResponseEntity<BatchWordDto>(words, HttpStatus.CREATED);
     }
 
@@ -62,13 +62,13 @@ public class WordController {
     public ResponseEntity<CsvOutput> generateCsv(@RequestBody BatchWordDto words) {
         System.out.println("Number of words submitted: " + words.getWords().length);
 
-        CsvOutput csv = this.wordService.generateCsvFrom(words);
+        CsvOutput csv = this.wordsService.generateCsvFrom(words);
         return new ResponseEntity<CsvOutput>(csv, HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWord(@PathVariable Long id) {
-        wordService.deleteWord(id);
+        wordsService.deleteWord(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

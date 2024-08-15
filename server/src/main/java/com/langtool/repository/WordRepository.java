@@ -8,9 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface WordRepository extends JpaRepository<WordEntity, Long> {
-    WordEntity findByOrigin(String origin);
+    Optional<WordEntity> findByOrigin(String origin);
 
     @Query("SELECT w.mentions FROM WordEntity w WHERE w.origin = :origin")
     Integer findMentionsByOrigin(@Param("origin") String origin);

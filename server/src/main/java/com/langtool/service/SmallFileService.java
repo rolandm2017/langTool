@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.langtool.client.PhotoToTextFacade;
 import com.langtool.model.CollectionEntity;
 import com.langtool.model.PhotoEntity;
+import com.langtool.model.TextGroupEntity;
 import com.langtool.repository.CollectionRepository;
 import com.langtool.repository.PhotoRepository;
 import com.langtool.repository.TextGroupRepository;
@@ -132,25 +133,28 @@ public class SmallFileService {
     private PhotoEntity writeNewPhotoToDb(String photoFileName, LocalDateTime creationTime) {
         System.out.println("writing photo to db: " + photoFileName);
         PhotoEntity newPhoto = new PhotoEntity(photoFileName, creationTime);
-        System.out.println("Saving text from " + photoFileName);
+        System.out.println("SmallFile:: Saving text from " + photoFileName);
         PhotoEntity savedPhoto = photoRepository.save(newPhoto); // store the photo's path and get its id for the next write.
         return savedPhoto;
     }
 
     private void writeNewTextGroupToDb(PhotoEntity newPhotoEntry, String[] textArr) {
-        logger.info("writing text group " + String.valueOf(textArr.length));
-        Long newPhotoInsertId = newPhotoEntry.getId();
-        textGroupRepository.insertTextGroup(newPhotoInsertId, textArr);
+        TextGroupEntity toInsert = new TextGroupEntity();
+        toInsert.setPhoto(newPhotoEntry);
+        toInsert.addWords(textArr);
+        textGroupRepository.save(toInsert);
     }
 
 
-    private void writeNewCollection(int intendedCollectionId, LocalDateTime creationDate, List<Long> photoIds) {
-        logger.info("writing collection with ids: " + String.valueOf(photoIds));
+    private void writeNewCollection(int intendedCollectionId, LocalDateTime creationDate, List<PhotoEntity> photos) {
+        // logger.info("writing collection with ids: " + String.valueOf(photoIds));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
         String labelAsMmDdYyyy = creationDate.format(formatter);
         // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy :: HH:mm");
         // String formattedDateTime = dateTime.format(formatter);
-        CollectionEntity newCollection = new CollectionEntity(labelAsMmDdYyyy, creationDate, photoIds);
+        CollectionEntity newCollection = new CollectionEntity(labelAsMmDdYyyy, creationDate);
+        // todo: convert photoIds to photos and add the photos
+        newCollection.addPhotos(photos);
         collectionRepository.save(newCollection);
     }
 

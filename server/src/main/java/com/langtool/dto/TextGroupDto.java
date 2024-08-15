@@ -2,12 +2,12 @@ package com.langtool.dto;
 
 public class TextGroupDto {
     private Long id;
-    private String srcFileName;
-    private String[] texts;
+    // private String srcFileName;
+    private String texts;
 
-    public TextGroupDto(Long id,  String srcFileName, String[] texts) {
+    public TextGroupDto(Long id, String texts) {
         this.id = id;
-        this.srcFileName = srcFileName;
+        // this.srcFileName = srcFileName;
         this.texts = texts;
     }
 
@@ -20,19 +20,19 @@ public class TextGroupDto {
     }
 
 
-    public String getSrcFileName() {
-        return srcFileName;
-    }
+    // public String getSrcFileName() {
+    //     return srcFileName;
+    // }
 
-    public void setSrcFileName(String srcFileName) {
-        this.srcFileName = srcFileName;
-    }
+    // public void setSrcFileName(String srcFileName) {
+    //     this.srcFileName = srcFileName;
+    // }
 
-    public String[] getTexts() {
+    public String getTexts() {
         return texts;
     }
 
-    public void setTexts(String[] texts) {
+    public void setTexts(String texts) {
         this.texts = texts;
     }
 

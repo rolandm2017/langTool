@@ -18,12 +18,12 @@ public class PhotoEntity {
     @Column(nullable = false)
     private LocalDateTime creationTime;
 
-    // TODO: add a "collectionLabel" property.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "collection_id", nullable = true)
+    private CollectionEntity collection;
 
-    // @ElementCollection
-    // @CollectionTable(name = "photo_texts", joinColumns = @JoinColumn(name = "photo_id"))
-    // @Column(name = "text")
-    // private List<String> extractedTexts;
+    @OneToOne(mappedBy = "photo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private TextGroupEntity textGroup;
 
     // Constructors
     public PhotoEntity() {}
@@ -53,6 +53,14 @@ public class PhotoEntity {
     
     public void setCreationTime(LocalDateTime creationTime) {
         this.creationTime = creationTime;
+    }
+
+    public CollectionEntity getCollection() {
+        return collection;
+    }
+
+    public void setCollection(CollectionEntity collection) {
+        this.collection = collection;
     }
 
     // public List<String> getExtractedTexts() {

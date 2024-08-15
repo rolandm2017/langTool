@@ -31,7 +31,7 @@ public class LangtoolApplication {
 
 
 	public static void main(String[] args) {
-		boolean resetAllTables = false;
+		boolean resetAllTables = true;
         
         if (resetAllTables) {
             System.out.println("## ## ## ## ## ## ## ## ## ## ## ## ##");
