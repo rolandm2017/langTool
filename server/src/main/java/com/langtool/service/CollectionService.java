@@ -22,6 +22,7 @@ import com.langtool.model.TextGroupEntity;
 import com.langtool.model.WordEntity;
 
 import com.langtool.dto.CollectionDto;
+import com.langtool.dto.EntityToDtoConverter;
 import com.langtool.dto.PhotoDto;
 
 import java.util.HashSet;;
@@ -41,7 +42,7 @@ public class CollectionService {
 
         if (maybeEntity.isPresent()) {
             CollectionEntity entity = maybeEntity.get();
-            CollectionDto dto = convertCollectionEntityToDto(entity);
+            CollectionDto dto = EntityToDtoConverter.convertCollectionEntityToDto(entity);
             return dto;
         }
         return new CollectionDto();
@@ -113,7 +114,7 @@ public class CollectionService {
         int i = 0;
 
         for (CollectionEntity toConvert : fromDb) {
-            CollectionDto dto = convertCollectionEntityToDto(toConvert);
+            CollectionDto dto = EntityToDtoConverter.convertCollectionEntityToDto(toConvert);
             dtos.add(dto);
             
             System.out.println("Processing item at index: " + i);
@@ -131,7 +132,7 @@ public class CollectionService {
         for (Long photoId : photoIds) {
             Optional<PhotoEntity> photo = photoRepository.findById(photoId);
             if (photo.isPresent()){
-                PhotoDto dto = convertPhotoEntityToPhotoDto(photo.get());
+                PhotoDto dto = EntityToDtoConverter.convertPhotoEntityToPhotoDto(photo.get());
                 photoDtos.add(dto);
             }
             

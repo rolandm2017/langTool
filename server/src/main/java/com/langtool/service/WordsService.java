@@ -2,10 +2,8 @@ package com.langtool.service;
 
 import com.langtool.dto.BatchWordDto;
 import com.langtool.dto.CsvOutput;
-import com.langtool.dto.PhotoDto;
+import com.langtool.dto.EntityToDtoConverter;
 import com.langtool.dto.WordDto;
-import com.langtool.model.CollectionEntity;
-import com.langtool.model.PhotoEntity;
 import com.langtool.model.TextGroupEntity;
 import com.langtool.model.WordEntity;
 import com.langtool.object.GenericPair;
@@ -13,7 +11,6 @@ import com.langtool.repository.CollectionRepository;
 import com.langtool.repository.TextGroupRepository;
 import com.langtool.repository.WordRepository;
 
-import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.Optional;
 
 @Service
@@ -37,15 +33,13 @@ public class WordsService {
     @Autowired
     private TextGroupRepository textGroupRepository;
 
-    @Autowired
-    private CollectionRepository collectionRepository;
+    // @Autowired
+    // private CollectionRepository collectionRepository;
 
     public List<WordDto> getAllWords() {
         List<WordEntity> words = wordRepository.findAll();
         System.out.println("getAllWords found " + String.valueOf(words.size()));
-        List<WordDto> wordDtoList = words.stream()
-                                    .map(this::convertWordToDto)
-                                    .collect(Collectors.toList());
+        List<WordDto> wordDtoList = EntityToDtoConverter.convertWordEntitiesToDtos(words);
         System.out.println("dto list size " + String.valueOf(wordDtoList.size()));
         return wordDtoList;
     }
@@ -55,10 +49,17 @@ public class WordsService {
          * getUnknownWordsFromCollections, as in, "get all the user's collections, and view the words."
          */
         System.out.println("start getUnknownWordsFromCollections 55rm");
-        List<WordEntity> wordsFromTextGroups = new ArrayList<>();
-        List<WordDto> wordsToLearn = new ArrayList<>();
-        Set<Long> alreadySeenWordsIds = new HashSet<Long>();
+        List<WordEntity> wordsFromTextGroups = getAllWordsFromTextGroups(collectionIds);
+        List<WordDto> wordsToLearn = EntityToDtoConverter.convertWordEntitiesToWordDtos(wordsFromTextGroups);
+        System.out.println("are we there yet? 79rm");
+        System.out.println("end getUnknownWordsFromCollections 77rm");
+        return wordsToLearn;
 
+    }
+
+    private List<WordEntity> getAllWordsFromTextGroups(List<Long> collectionIds) {
+        List<WordEntity> wordsFromTextGroups = new ArrayList<>();
+        Set<Long> alreadySeenWordsIds = new HashSet<Long>();
         for (Long someCollectionId: collectionIds) {
             List<TextGroupEntity> groups = textGroupRepository.findByCollectionId(someCollectionId);
             for (TextGroupEntity group: groups) {
@@ -75,29 +76,10 @@ public class WordsService {
                 }
             }
         }
-        wordsToLearn = convertWordEntitiesToWordDtos(wordsFromTextGroups);
-        System.out.println("are we there yet? 79rm");
-        System.out.println("end getUnknownWordsFromCollections 77rm");
-        return wordsToLearn;
-
+        return wordsFromTextGroups;
     }
 
-    private List<WordDto> convertWordEntitiesToWordDtos(List<WordEntity> list) {
-        // List<WordDto> dtos = // todo
-        // return dtos;
-        List<WordDto> wordDtos = new ArrayList<>();
-        for (WordEntity word : list) {
-            WordDto dto = convertWordEntityToWordDto(word);
-            wordDtos.add(dto);
-        }
-        return wordDtos;
-    }
 
-    private WordDto convertWordEntityToWordDto(WordEntity word) {
-        return new WordDto(
-            // todo
-        );
-    }
 
     public WordEntity saveWord(WordDto word) {
         WordEntity asEntity = this.convertDtoToWord(word);

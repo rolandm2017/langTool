@@ -3,8 +3,8 @@ package com.langtool.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.cloud.vision.v1.Word;
 import com.langtool.client.PhotoToTextFacade;
+import com.langtool.dto.EntityToDtoConverter;
 import com.langtool.dto.PhotoDto;
 import com.langtool.model.CollectionEntity;
 import com.langtool.model.PhotoEntity;
@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.Comparator;
 import java.util.HashSet;
 
@@ -67,7 +66,7 @@ public class PhotoUploadService {
         List<PhotoDto> processed = new ArrayList<>();
         System.out.println("all # : " + Integer.toString(all.size()));
         for (PhotoEntity toConvert : all) {
-            PhotoDto dto = convertPhotoEntityToPhotoDto(toConvert);
+            PhotoDto dto = EntityToDtoConverter.convertPhotoEntityToPhotoDto(toConvert);
             processed.add(dto);
         }
         return processed;
@@ -301,9 +300,9 @@ public class PhotoUploadService {
         }
     }
 
-    private void info(String text) {
-        logger.info(text);
-    }
+    // private void info(String text) {
+    //     logger.info(text);
+    // }
 
  
 }

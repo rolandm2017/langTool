@@ -1,21 +1,73 @@
 package com.langtool.dto;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.langtool.model.CollectionEntity;
 import com.langtool.model.PhotoEntity;
 import com.langtool.model.TextGroupEntity;
 import com.langtool.model.WordEntity;
-import com.langtool.repository.TextGroupRepository;
 
 public class EntityToDtoConverter {
 
-    private WordDto convertWordToDto(WordEntity word) {
+    public static List<WordDto> convertWordEntitiesToWordDtos(List<WordEntity> list) {
+        // List<WordDto> dtos = // todo
+        // return dtos;
+        List<WordDto> wordDtos = new ArrayList<>();
+        for (WordEntity word : list) {
+            WordDto dto = convertWordEntityToWordDto(word);
+            wordDtos.add(dto);
+        }
+        return wordDtos;
+    }
+
+    public static WordDto convertWordEntityToWordDto(WordEntity word) {
+        return new WordDto(
+            // todo
+        );
+    }
+
+    public static List<TextGroupDto> convertTextGroupEntitiesToDtos(List<TextGroupEntity> list) {
+        List<TextGroupDto> out = new ArrayList<TextGroupDto>();
+
+        for (TextGroupEntity entity: list) {
+            String toAdd = ""; 
+            Set<WordEntity> wordsToAppend = entity.getWords();
+            for (WordEntity word: wordsToAppend) {
+                toAdd = toAdd + " " + word.getOrigin();
+            }
+            TextGroupDto dto = new TextGroupDto(entity.getId(), toAdd);
+            out.add(dto);
+        }
+
+        return out;
+    }
+
+    public static List<TextGroupDto> convertTextGroupEntitiesToTextGroupDtos(List<TextGroupEntity> entities) {
+        List<TextGroupDto> out = new ArrayList<>();
+        for (TextGroupEntity group: entities) {
+            String toAdd = ""; 
+            Set<WordEntity> wordsToAppend = group.getWords();
+            for (WordEntity word: wordsToAppend) {
+                toAdd = toAdd + " " + word.getOrigin();
+            }
+            TextGroupDto dto = new TextGroupDto(group.getId(), toAdd);
+            out.add(dto);
+        }
+        return out;
+    }
+
+
+    public static List<WordDto> convertWordEntitiesToDtos(List<WordEntity> list) {
+        return list.stream()
+                   .map(EntityToDtoConverter::convertWordToDto)
+                   .collect(Collectors.toList());    
+    }
+
+    public static WordDto convertWordToDto(WordEntity word) {
         WordDto wordDto = new WordDto();
         wordDto.setId(word.getId());
         wordDto.setOrigin(word.getOrigin());
@@ -25,7 +77,7 @@ public class EntityToDtoConverter {
     }
 
 
-    private CollectionDto convertCollectionEntityToDto(CollectionEntity entity) {
+    public static CollectionDto convertCollectionEntityToDto(CollectionEntity entity) {
         return new CollectionDto(
             String.valueOf(entity.getId()),
             entity.getLabel(),
@@ -34,7 +86,7 @@ public class EntityToDtoConverter {
         );
     }
 
-    private List<PhotoDto> convertPhotoEntitiesToPhotoDtos(List<PhotoEntity> list) {
+    public static List<PhotoDto> convertPhotoEntitiesToPhotoDtos(List<PhotoEntity> list) {
         List<PhotoDto> photoDtos = new ArrayList<>();
         for (PhotoEntity photo : list) {
             PhotoDto dto = convertPhotoEntityToPhotoDto(photo);
@@ -43,12 +95,20 @@ public class EntityToDtoConverter {
         return photoDtos;
     }
 
-    private PhotoDto convertPhotoEntityToPhotoDto(PhotoEntity toConvert) {
-        Long id = toConvert.getId();
-        System.out.println("processing ... " + Long.toString(id));
+    public static PhotoDto convertPhotoEntityToPhotoDto(PhotoEntity toConvert) {
         CollectionEntity relatedCollection = toConvert.getCollection();
         List<TextGroupEntity> relatedTextGroup = relatedCollection.getTextGroups();
-        Set<WordEntity> wordsCollector = new HashSet<WordEntity>();
+        Set<WordEntity> wordsToPackage = eliminateDuplicateWords(relatedTextGroup);
+        List<String> goIntoHere = makePhotoDtoTextArr(wordsToPackage);
+        return new PhotoDto(
+            toConvert.getId(),
+            toConvert.getFilePath(),
+            goIntoHere
+        );
+    }
+
+    private static Set<WordEntity> eliminateDuplicateWords(List<TextGroupEntity> relatedTextGroup) {
+        Set<WordEntity> uniques = new HashSet<WordEntity>();
         Set<Long> seenIds = new HashSet<Long>();
         for (TextGroupEntity tge: relatedTextGroup) {
             Set<WordEntity> words = tge.getWords();
@@ -56,53 +116,19 @@ public class EntityToDtoConverter {
                 if (seenIds.contains(w.getId())) {
                     continue;
                 }
-                wordsCollector.add(w);
+                uniques.add(w);
                 seenIds.add(w.getId());
             }
         }
-        List<String> goIntoHere = new ArrayList<>();
-        for (WordEntity w: wordsCollector) {
-            goIntoHere.add(w.getOrigin());
-        }
-        return new PhotoDto(
-            toConvert.getId(),
-            toConvert.getFilePath(),
-            goIntoHere
-        );
+        return uniques;
     }
     
-    private PhotoDto convertPhotoEntityToPhotoDto(PhotoEntity toConvert, TextGroupRepository textGroupRepository) {
-        Optional<TextGroupEntity> photoText = textGroupRepository.findById(toConvert.getId());
-        if (photoText.isPresent()) {
-            CollectionEntity relatedCollection = toConvert.getCollection();
-            List<TextGroupEntity> relatedGroups = relatedCollection.getTextGroups();
-            Set<WordEntity> wordsToPackage = new HashSet<>();
-            Set<Long> seenIds = new HashSet<>();
-            for (TextGroupEntity tg : relatedGroups) {
-                Set<WordEntity> words = tg.getWords();
-                for (WordEntity w: words) {
-                    if (seenIds.contains(w.getId())) {
-                        continue;
-                    }
-                    wordsToPackage.add(w);
-                }
-            }
-            Set<WordEntity> wordsToAdd = wordsToPackage;
-            Set<String> justTheirStrings = new HashSet<>();
-            for (WordEntity w: wordsToAdd) {
-                justTheirStrings.add(w.getOrigin());
-            }
-            String[] stringArray = justTheirStrings.toArray(new String[0]);
-            List<String> wordsToEmbed = Arrays.asList(stringArray);
-            return new PhotoDto(
-                toConvert.getId(),
-                toConvert.getFilePath(),
-                wordsToEmbed
-            );
+    private static List<String> makePhotoDtoTextArr(Set<WordEntity> words) {
+        List<String> goIntoHere = new ArrayList<>();
+        for (WordEntity w: words) {
+            goIntoHere.add(w.getOrigin());
         }
-        List<String> failure = new ArrayList<>();
-        Long failureValue = null;
-        return new PhotoDto(failureValue, "Error", failure);
-        
+        return goIntoHere;
     }
+   
 }
