@@ -1,7 +1,9 @@
 package com.langtool.service;
 
+import com.langtool.dao.WordDao;
 import com.langtool.dto.BatchWordDto;
-import com.langtool.dto.CsvOutput;
+import com.langtool.dto.CsvOutputDto;
+import com.langtool.dto.DtoToEntityConverter;
 import com.langtool.dto.EntityToDtoConverter;
 import com.langtool.dto.WordDto;
 import com.langtool.model.TextGroupEntity;
@@ -26,18 +28,16 @@ import java.util.Optional;
 public class WordsService {
 
     @Autowired
-    private WordRepository wordRepository;
-    @Autowired
     private TranslationService translationService;
 
     @Autowired
     private TextGroupRepository textGroupRepository;
 
-    // @Autowired
-    // private CollectionRepository collectionRepository;
+    @Autowired
+    private WordDao wordDao;
 
     public List<WordDto> getAllWords() {
-        List<WordEntity> words = wordRepository.findAll();
+        List<WordEntity> words = wordDao.findAllWords();
         System.out.println("getAllWords found " + String.valueOf(words.size()));
         List<WordDto> wordDtoList = EntityToDtoConverter.convertWordEntitiesToDtos(words);
         System.out.println("dto list size " + String.valueOf(wordDtoList.size()));
@@ -81,67 +81,47 @@ public class WordsService {
 
 
 
-    public WordEntity saveWord(WordDto word) {
-        WordEntity asEntity = this.convertDtoToWord(word);
+    public void saveWord(WordDto word) {
+        WordEntity asEntity = DtoToEntityConverter.convertDtoToWord(word);
         Integer currentMentions = this.getCurrentMentionCount(asEntity);
         if (currentMentions == null) {
             currentMentions = 0;
         }
         asEntity.setMentions(currentMentions + 1); // set and increment
-        return wordRepository.save(asEntity);
+        wordDao.saveWord(asEntity);
     }
 
     public WordEntity[] saveWords(BatchWordDto words) {
         
-        WordEntity[] wordsToSave = this.convertBatchWordDtoToWords(words);
+        WordEntity[] wordsToSave = DtoToEntityConverter.convertBatchWordDtoToWords(words);
     
-        List<WordEntity> savedWords = wordRepository.saveAll(Arrays.asList(wordsToSave));
+        List<WordEntity> savedWords = wordDao.saveAllWords(wordsToSave);
         
         return savedWords.toArray(new WordEntity[0]); // fixme: does this return the first word or all words?
     }
 
     public Optional<WordEntity> getWordById(Long id) {
-        return wordRepository.findById(id);
+        return wordDao.findWordById(id);
     }
 
     public void deleteWord(Long id) {
-        wordRepository.deleteById(id);
+        wordDao.deleteWordById(id);
     }
 
     
-    private WordEntity convertDtoToWord(WordDto wordDto) {
-        WordEntity word = new WordEntity();
-        word.setId(wordDto.getId());
-        word.setOrigin(wordDto.getOrigin());
-        word.setDateSubmitted(wordDto.getDateSubmitted());
-        word.setNovelty(wordDto.getNovelty());
-        return word;
-    }
+
     
     private Integer getCurrentMentionCount(WordEntity word) {
-        return this.wordRepository.findMentionsByOrigin(word.getOrigin());
+        return this.wordDao.findMentionsByOrigin(word.getOrigin());
     }
 
-    private WordEntity[] convertBatchWordDtoToWords(BatchWordDto batchWordDto) {
-    return Arrays.stream(batchWordDto.getWords())
-        .map(wordString -> {
-            WordEntity word = new WordEntity();
-            word.setOrigin(wordString);
-            word.setDateSubmitted(LocalDateTime.now());
-            word.setNovelty(10);  // Default value, adjust as needed
-            word.setMentions(1); // Initial submission counts as first mention
-            return word;
-        })
-        .toArray(WordEntity[]::new);
-    }
+   
 
-    public CsvOutput generateCsvFrom(BatchWordDto words) {
+    public CsvOutputDto generateCsvFrom(BatchWordDto words) {
         // figure out which words are in the db already
         List<WordEntity> existingWords = this.findExistingWords(words);
         // increment the words that are there already by 1
-        this.wordRepository.incrementMentionsForWords(existingWords.stream()
-                                                        .map(WordEntity::getOrigin)
-                                                        .toArray(String[]::new));
+        wordDao.incrementMentionsForWords(existingWords);
         // add the words that aren't in the db yet
         List<WordEntity> novelWords = this.findMissingWords(words);
 
@@ -160,7 +140,7 @@ public class WordsService {
             String singleLine = pair.getEn() + "," + pair.getFr();
             csvOut = csvOut + singleLine + "\n";
         }
-        CsvOutput csvOutObj = new CsvOutput(csvOut);
+        CsvOutputDto csvOutObj = new CsvOutputDto(csvOut);
 
         // return the csv
         return csvOutObj;
@@ -168,13 +148,13 @@ public class WordsService {
 
     public List<WordEntity> findExistingWords(BatchWordDto inputWords) {
         List<String> wordList = Arrays.asList(inputWords.getWords());
-        return wordRepository.findAllByOriginIn(wordList);
+        return wordDao.findAllByOrigins(wordList);
     }
 
     public List<WordEntity> findMissingWords(BatchWordDto inputWords) {
         List<String> wordList = Arrays.asList(inputWords.getWords());
         // todo: make this alphabetized for search efficiency
-        List<WordEntity> existingWords = wordRepository.findAllByOriginIn(wordList);
+        List<WordEntity> existingWords = wordDao.findAllByOrigins(wordList);
         
         List<WordEntity> missingWords = new ArrayList<>();
         for (WordEntity wordToCheck: existingWords) {

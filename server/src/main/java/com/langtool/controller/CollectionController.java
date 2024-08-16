@@ -20,11 +20,6 @@ public class CollectionController {
     @Autowired
     private CollectionService collectionService;
 
-    // @GetMapping("/{photoCollectionId}")
-    // public List<PhotoText> getPhotoTexts(@PathVariable Long photoCollectionId) {
-        
-    //     return photoTexts;
-    // }
     @GetMapping("/{photoCollectionId}")
     public CollectionDto getCollectionById(@PathVariable Long photoCollectionId) {
         return collectionService.getCollectionById(photoCollectionId);
@@ -70,7 +65,8 @@ public class CollectionController {
     public ResponseEntity<UpdateResponse> updateCollectionLabel(@RequestBody UpdateCollectionLabelRequest request) {
         try {
             System.out.println(request.toString() + "  :: 68rm");
-            boolean success = collectionService.updateCollectionLabel(request.getId(), request.getLabel());        
+            Long idAsLong = Long.valueOf(request.getId());
+            boolean success = collectionService.updateCollectionLabel(idAsLong, request.getLabel());        
             if (success) {
                 return ResponseEntity.ok(new UpdateResponse(true));
             } else {

@@ -14,7 +14,7 @@ import java.util.List;
 import com.langtool.dto.WordDto;
 import com.langtool.dto.BatchWordDto;
 import com.langtool.service.WordsService;
-import com.langtool.dto.CsvOutput;
+import com.langtool.dto.CsvOutputDto;
 
 
 
@@ -29,6 +29,7 @@ public class WordController {
 
     @GetMapping("/all")
     public List<WordDto> getAllWords() {
+        System.out.println("wordsController getAllWords");
         return wordsService.getAllWords();
     }
 
@@ -59,11 +60,11 @@ public class WordController {
     }
 
     @PostMapping("/generateCsv")
-    public ResponseEntity<CsvOutput> generateCsv(@RequestBody BatchWordDto words) {
+    public ResponseEntity<CsvOutputDto> generateCsv(@RequestBody BatchWordDto words) {
         System.out.println("Number of words submitted: " + words.getWords().length);
 
-        CsvOutput csv = this.wordsService.generateCsvFrom(words);
-        return new ResponseEntity<CsvOutput>(csv, HttpStatus.ACCEPTED);
+        CsvOutputDto csv = this.wordsService.generateCsvFrom(words);
+        return new ResponseEntity<CsvOutputDto>(csv, HttpStatus.ACCEPTED);
     }
 
     @DeleteMapping("/{id}")

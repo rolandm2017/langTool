@@ -1,13 +1,13 @@
 package com.langtool.dto;
 
-public class CsvOutput {
+public class CsvOutputDto {
     private String output;
 
     // Default constructor
-    public CsvOutput() {}
+    public CsvOutputDto() {}
 
     // Constructor with parameter
-    public CsvOutput(String output) {
+    public CsvOutputDto(String output) {
         this.output = output;
     }
 

@@ -130,5 +130,19 @@ public class EntityToDtoConverter {
         }
         return goIntoHere;
     }
+
+    public static List<CollectionDto> convertCollectionEntitiesToDtos(List<CollectionEntity> fromDb) {
+        List<CollectionDto> dtos = new ArrayList<>();
+        int i = 0;
+
+        for (CollectionEntity toConvert : fromDb) {
+            CollectionDto dto = EntityToDtoConverter.convertCollectionEntityToDto(toConvert);
+            dtos.add(dto);
+            
+            System.out.println("Processing item at index: " + i);
+            i++; 
+        }
+        return dtos;
+    }
    
 }

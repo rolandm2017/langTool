@@ -17,7 +17,7 @@ public interface WordRepository extends JpaRepository<WordEntity, Long> {
     Integer findMentionsByOrigin(@Param("origin") String origin);
 
     @Query("SELECT w FROM WordEntity w WHERE w.origin IN :origins")
-    List<WordEntity> findAllByOriginIn(@Param("origins") List<String> origins);
+    List<WordEntity> findAllByOrigins(@Param("origins") List<String> origins);
 
     @Modifying
     @Transactional

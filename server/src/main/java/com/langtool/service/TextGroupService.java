@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 
+import com.langtool.dao.TextGroupDao;
 import com.langtool.dto.EntityToDtoConverter;
 import com.langtool.dto.TextGroupDto;
 import com.langtool.model.TextGroupEntity;
@@ -19,23 +20,16 @@ import com.langtool.repository.TextGroupRepository;
 public class TextGroupService {
     
     @Autowired
-    TextGroupRepository textGroupRepository;
+    TextGroupDao textGroupDao;
 
     public List<TextGroupDto> getAllTextGroups() {
-        List<TextGroupEntity> all = textGroupRepository.findAll();
+        List<TextGroupEntity> all = textGroupDao.findAllTextGroups();
         System.out.println("found " +all.size() + " items");
         List<TextGroupDto> dtoList = EntityToDtoConverter.convertTextGroupEntitiesToDtos(all);
         return dtoList;
     }
 
-    
-    public void addWordToTextGroup(Long groupId, String word) {
-        TextGroupEntity textGroup = textGroupRepository.findById(groupId).orElseThrow();
-        WordEntity newWord = new WordEntity();
-        newWord.setWord("example");
-        textGroup.addWord(newWord);
-        textGroupRepository.save(textGroup);  // This will also save the new word
-    }
+
 
     
 }
