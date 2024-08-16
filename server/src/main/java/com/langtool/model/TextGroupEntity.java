@@ -3,6 +3,7 @@ package com.langtool.model;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
 
@@ -12,14 +13,16 @@ import jakarta.persistence.*;
 public class TextGroupEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="textGroupId")
+
     private Long textGroupId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "photo_id")
+    @JoinColumn(name = "photoId")
     private PhotoEntity photo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "collection_id", nullable = true)
+    @JoinColumn(name = "collectionId", nullable = true)
     private CollectionEntity collection;
 
     // @Column(nullable = false, columnDefinition = "TEXT")
@@ -92,5 +95,17 @@ public class TextGroupEntity {
     public void removeWord(WordEntity word) {
         words.remove(word);
         word.getTextGroups().remove(this);
+    }
+
+    @Override
+    public String toString() {
+        return "TextGroupEntity{" +
+               "textGroupId=" + (textGroupId != null ? textGroupId : "null") +
+               ", photo=" + (photo != null ? "PhotoEntity(id=" + photo.getId() + ")" : "null") +
+               ", collection=" + (collection != null ? "CollectionEntity(id=" + collection.getId() + ")" : "null") +
+               ", words=[" + words.stream()
+                               .map(word -> word.getId() + ":" + word.getOrigin())
+                               .collect(Collectors.joining(", ")) +
+               "]}";
     }
 }

@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.Comparator;
 import java.util.HashSet;
 
@@ -118,8 +119,17 @@ public class PhotoUploadService {
                 // process photo text
                 logger.info("Passing photo to cloud vision");
                 String[] gatheredTextArr = passPhotoToGoogleCloudVision(reassembledPhoto);
+                System.out.println(gatheredTextArr.length);
+                System.out.println("122rm");
+                System.out.println("122rm");
+                System.out.println("x 122rm");
+                System.out.println("x 122rm");
+                System.out.println("x 122rm");
+                System.out.println("x 122rm");
+                System.out.println("122rm");
                 List<WordEntity> newWordsToAdd = convertCloudVisionContentToWordEntities(gatheredTextArr);
                 // TODO: move away from a native query -> make the ORM do it for you using getter,setter
+                System.out.println("132rm");
                 writeNewTextGroupToDb(intendedCollectionId, photo, newWordsToAdd);
             }
         } catch (IOException e) {
@@ -135,7 +145,13 @@ public class PhotoUploadService {
 
     private List<WordEntity> convertCloudVisionContentToWordEntities(String[] gatheredText) {
         List<WordEntity> out = new ArrayList<WordEntity>();
-        for (String text: gatheredText) {
+
+        // String[] lines = gatheredText.split("\\n");
+        String[] lines = gatheredText;
+
+        for (String text: lines) {
+            
+
             Optional<WordEntity> existingRow = wordRepository.findByOrigin(text);
             if (existingRow.isPresent()) {
                 // increment
@@ -146,6 +162,10 @@ public class PhotoUploadService {
                 continue;
             }
             WordEntity topic = new WordEntity();
+            // System.out.println(text + " 149rm");
+            // System.out.println(String.valueOf(gatheredText.length) + " 137rm");
+            // System.out.println(String.valueOf(text.length()) + " 150rm");
+
             topic.setOrigin(text);
             out.add(topic);
         }
@@ -195,6 +215,12 @@ public class PhotoUploadService {
     }
 
     private PhotoEntity writeNewPhotoToDb(String photoFileName, LocalDateTime creationTime, Long intendedCollectionId) {
+        List<CollectionEntity> all = collectionRepository.findAll();
+        List<Long> collectionIds = all.stream()
+                              .map(CollectionEntity::getId)
+                              .collect(Collectors.toList());
+        System.out.println("coll ids");
+        System.out.println(collectionIds);
         System.out.println("writing photo to db: " + photoFileName);
         Optional<CollectionEntity> someCollectionThatMightExist = collectionRepository.findById(intendedCollectionId);
         if (someCollectionThatMightExist.isPresent()) {
@@ -212,11 +238,13 @@ public class PhotoUploadService {
         String defaultCollectionlabel = String.valueOf(creationTime);
         fromScratch.setId(intendedCollectionId);
         fromScratch.setLabel(defaultCollectionlabel);
-        collectionRepository.save(fromScratch);
+        CollectionEntity fromScratchButSaved = collectionRepository.save(fromScratch);
 
         PhotoEntity newPhoto = new PhotoEntity(photoFileName, creationTime);
-        newPhoto.setCollection(fromScratch);
-        System.out.println("Saving text from " + photoFileName);
+        newPhoto.setCollection(fromScratchButSaved);
+        System.out.println(fromScratchButSaved);
+        System.out.println("[237rm] Saving text from " + photoFileName);
+        System.out.println(newPhoto.toString());
         // fixme: has to have a collection set
         PhotoEntity savedPhoto = photoRepository.save(newPhoto); // store the photo's path and get its id for the next write.
         System.out.println("does this print? 202rm");
@@ -232,12 +260,18 @@ public class PhotoUploadService {
             if (seenIds.contains(word.getId())) {
                 continue;
             }
-            seenIds.add(word.getId());
-            uniqueWordsOnly.add(word);
+            WordEntity afterSave = wordRepository.save(word);
+            seenIds.add(afterSave.getId());
+            uniqueWordsOnly.add(afterSave);
         }
         toSave.setWords(uniqueWordsOnly);
         toSave.setPhoto(newPhotoEntry);
+        System.out.println("268rm");
+        System.out.println(toSave.toString());
+        System.out.println("my id : ");
+        System.out.println(toSave.getId());
         textGroupRepository.save(toSave);
+        logger.info("[finished] writing text group " +  String.valueOf(wordsToAdd.size()));
         // Long newPhotoInsertId = newPhotoEntry.getId();
         // textGroupRepository.insertTextGroup(associatedCollectionId, newPhotoInsertId, textArr);
     }
@@ -288,10 +322,10 @@ public class PhotoUploadService {
         // keep the api query separate.
         try {
             String response = photoToTextFacade.convertPhotoToTextUsingGoogle(photo);
-            String[] words = response.split(" ");
-            for (String item : words) {
-                System.out.println(photo.getName() + " -> Word from google: " + String.valueOf(item.length()));
-            }
+            String[] words = response.split("\n");
+            // for (String item : words) {
+            //     System.out.println(photo.getName() + " -> Word from google: " + String.valueOf(item.length()));
+            // }
             return words;
         } catch (IOException e) {
             String errorMessage = "Error analyzing image: " + e.getMessage();

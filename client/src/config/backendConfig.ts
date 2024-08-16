@@ -7,14 +7,22 @@ function makeUrl(route: string): string {
     return apiUrl + "/api" + route
 }
 
+// upload
 const photoUploadUrl = apiUrl + "/api/photos/upload"
+// collections
 const getCollectionsUrl = apiUrl + "/api/photocollections"
 const getNextCollectionIdUrl = apiUrl + "/api/photocollections/next-id"
 const updateCollectionLabelUrl = makeUrl("/photocollections/update-label")
+// words
+const getWordsListUrl = makeUrl("/words/all")
 
 const backendConfig = {
     apiUrl,
+    // words controller
+    getWordsListUrl,
+    // upload
     photoUploadUrl,
+    // collections
     getCollectionsUrl,
     getNextCollectionIdUrl,
     updateCollectionLabelUrl,

@@ -91,7 +91,8 @@ public class LangtoolApplication {
         }
 
         private void resetSequences() {
-            System.out.println("Resetting sequences...");
+            String message = "Resetting sequences";
+            System.out.println(ANSI_YELLOW + message + ANSI_RESET);
             // Fetch and reset all sequences in the public schema
             List<String> sequences = entityManager.createNativeQuery(
                 "SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public'")

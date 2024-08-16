@@ -2,17 +2,13 @@ package com.langtool.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,6 +23,7 @@ public class WordEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="wordId")
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -37,8 +34,7 @@ public class WordEntity {
 
     private boolean isKnown;
 
-    @Column(name = "text_group_id", nullable = false)
-    private Long collectionId;
+
 
     @ManyToMany(mappedBy = "words")
     private Set<TextGroupEntity> textGroups = new HashSet<TextGroupEntity>();

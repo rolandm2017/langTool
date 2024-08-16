@@ -11,6 +11,7 @@ import java.util.Collections;
 public class CollectionEntity {
     @Id
     // @GeneratedValue(strategy = GenerationType.)
+    @Column(name="collectionId")
     private Long collectionId;
 
     @Column(nullable = true)

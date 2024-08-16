@@ -10,6 +10,7 @@ import java.util.List;
 public class PhotoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="photoId")
     private Long photoId;
 
     @Column(nullable = false)
@@ -19,7 +20,7 @@ public class PhotoEntity {
     private LocalDateTime creationTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "collection_id", nullable = true)
+    @JoinColumn(name = "collectionId", nullable = true)
     private CollectionEntity collection;
 
     @OneToOne(mappedBy = "photo", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -70,4 +71,15 @@ public class PhotoEntity {
     // public void setExtractedTexts(List<String> extractedTexts) {
     //     this.extractedTexts = extractedTexts;
     // }
+
+    @Override
+    public String toString() {
+        return "PhotoEntity{" +
+            "photoId=" + photoId +
+            ", filePath='" + filePath + '\'' +
+            ", creationTime=" + creationTime +
+            ", collection=" + (collection != null ? collection.getId() : "null") +
+            ", textGroup=" + (textGroup != null ? textGroup.getId() : "null") +
+            '}';
+    }
 }

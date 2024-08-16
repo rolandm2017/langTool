@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
+import { useSearchParams } from "react-router-dom"
+
 import {
     Chart,
     ChartConfiguration,
@@ -13,7 +15,7 @@ import {
 } from "@/util/pageStates"
 import WordDistributionChart from "@/components/collectionsPreview/WordDistributionChart"
 import WordList from "@/components/collectionsPreview/WordList"
-import { Collection } from "@/interface/Collection.int"
+import { Collection } from "@/interface/interfaces.int"
 import { dummyPhotoCollections } from "@/assets/dummyCollections"
 import useGetCollections from "@/api/useGetCollections.api"
 import useGetNextCollectionId from "@/api/useGetNextCollectionId.api"
@@ -24,9 +26,35 @@ import { useUpdateCollectionLabel } from "@/api/useUpdateCollectionLabel.api"
 //
 
 const PhotoCollectionPreviewPage: React.FC = () => {
+    const [searchParams, setSearchParams] = useSearchParams()
     const [navState, setNavState] = useState<PhotoCollectionPageState>(
         photoCollectionPageStates.collections
     )
+
+    useEffect(() => {
+        const option = searchParams.get("option")
+        const isValidPhotoCollectionPageState = (
+            state: unknown
+        ): state is PhotoCollectionPageState =>
+            ["collections", "chart", "list"].includes(state as string)
+        if (isValidPhotoCollectionPageState(option)) {
+            const typedVariable: PhotoCollectionPageState = option
+            switch (typedVariable) {
+                case photoCollectionPageStates.collections:
+                    setNavState(typedVariable)
+                    break
+                case photoCollectionPageStates.chart:
+                    setNavState(typedVariable)
+                    break
+                case photoCollectionPageStates.list:
+                    setNavState(typedVariable)
+                    break
+                default:
+                    console.error("Error: Invalid page type: " + option)
+                    setNavState(photoCollectionPageStates.collections)
+            }
+        }
+    }, [searchParams])
 
     const [pageError, setPageError] = useState("")
 
@@ -93,13 +121,23 @@ const PhotoCollectionPreviewPage: React.FC = () => {
         )
     }
 
+    function handleChangeNavStateAndUrlParam(
+        newState: PhotoCollectionPageState
+    ) {
+        setNavState(newState)
+        setSearchParams({ option: newState })
+    }
+
     return (
         <div style={styles.container}>
             <div style={{ width: "80%", margin: "0 auto" }}>
                 <div>
                     <h1 style={styles.title}>Photo Set Preview</h1>
                 </div>
-                <ThreeStateNavToggle onStateChange={setNavState} />
+                <ThreeStateNavToggle
+                    currentState={navState}
+                    onStateChange={handleChangeNavStateAndUrlParam}
+                />
                 {renderComponent()}
             </div>
         </div>

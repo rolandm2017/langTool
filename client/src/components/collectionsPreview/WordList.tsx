@@ -1,23 +1,29 @@
-import React, { useState } from "react"
-
-interface Word {
-    word: string
-    count: number
-}
+import React, { useEffect, useState } from "react"
+import { Word } from "@/interface/interfaces.int"
+import { useGetWordsList } from "@/api/useGetWordsList.api"
 
 const WordList: React.FC = () => {
     const [words, setWords] = useState<Word[]>([
-        { word: "de", count: 438 },
-        { word: "la", count: 372 },
-        { word: "le", count: 311 },
+        { word: "de", isKnown: true, count: 438 },
+        { word: "la", isKnown: true, count: 372 },
+        { word: "le", isKnown: true, count: 311 },
         { word: "il", count: 237 },
         { word: "les", count: 204 },
-        { word: "et", count: 196 },
+        { word: "et", isKnown: true, count: 196 },
         { word: "à", count: 167 },
         { word: "commissaire", count: 156 },
-        { word: "un", count: 155 },
+        { word: "un", isKnown: true, count: 155 },
         { word: "une", count: 145 },
     ])
+
+    const { retrievedWords, isLoading } = useGetWordsList()
+
+    useEffect(() => {
+        const loaded = !isLoading
+        if (loaded) {
+            setWords(retrievedWords)
+        }
+    }, [isLoading])
 
     const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
@@ -39,6 +45,10 @@ const WordList: React.FC = () => {
                     <li key={word.word} style={styles.listItem}>
                         <span style={styles.word}>{word.word}</span>
                         <span style={styles.count}>{word.count}</span>
+                        <span style={styles.count}>
+                            {word.isKnown ? "Known" : ""}
+                            {""}
+                        </span>
                         <button
                             style={styles.button}
                             onClick={() => handleIgnore(word.word)}

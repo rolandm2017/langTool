@@ -9,3 +9,9 @@ export interface Collection {
     label: string
     photos: Photo[]
 }
+
+export interface Word {
+    word: string
+    count: number
+    isKnown?: boolean
+}
