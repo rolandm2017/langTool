@@ -54,6 +54,10 @@ public class TextGroupEntity {
         return textGroupId;
     }
 
+    public void setId(Long id) {
+        textGroupId = id;
+    }
+
     public PhotoEntity getPhoto() {
         return photo;
     }
